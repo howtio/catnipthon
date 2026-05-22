@@ -7,7 +7,7 @@
 
 ## 当前版本
 
-`0.1`（Phase 1 完成：Gateway + Queue + Worker）
+`0.2`（Phase 2 完成：Harness + Context + Skills + Memory + EventBus）
 
 ---
 
@@ -19,32 +19,40 @@
 | Phase 0（骨架 1.0：基础文档 + 目录） | 已完成 |
 | Phase 0（骨架 2.0：Python 工程化 + 导入策略） | 已完成 |
 | Phase 1（Gateway + Queue + Worker） | 已完成 |
-| Phase 2（Harness + Context + Skills + Memory） | 未开始 |
+| Phase 2（Harness + Context + Skills + Memory + EventBus） | 已完成 |
 | Phase 3（Runner + EventBus 骨架） | 未开始 |
 | Phase 4（Tool Registry + Executor 骨架） | 未开始 |
 | Phase 5（最小工具集） | 未开始 |
 | Phase 6（DeepSeek 接入 + tool calling） | 未开始 |
 | Phase 7（日志、验收、final report） | 未开始 |
-| typecheck | 通过（17 文件 0 问题） |
-| 测试 | 9/9 通过 |
+| typecheck | 通过（28 文件 0 问题） |
+| 测试 | 38/38 通过 |
 
 ---
 
 ## 进行中
 
-- 无（Phase 1 已完成，等待 Phase 2）
+- 无（Phase 2 已完成，等待 Phase 3）
 
 ---
 
 ## 未开始
 
-- Phase 2：Harness + Context + Skills + Memory
-- Phase 3 ~ 7
+- Phase 3：Runner + EventBus 完善
+- Phase 4 ~ 7
 
 ---
 
 ## 已完成
 
+- Phase 2（2026-05-23）：Harness + Context + Skills + Memory + EventBus — 真实编排 pipeline
+  - `09-eventbus`：异步 pub/sub（publish/subscribe/unsubscribe）
+  - `05-context`：文档加载、workspace 扫描、system prompt 构建、开工清单提取
+  - `06-skills`：技能注册表、关键词匹配、SKILL.md 加载注入
+  - `07-memory`：MemorySnapshot、working memory、JSON 持久化
+  - `04-harness`：真实编排（Context → Skills → Memory → Runner → EventBus → final report）
+  - `08-runner`：Phase 2 占位
+  - 测试：38 个全部通过
 - Phase 1（2026-05-23）：Gateway + Queue + Worker 最小链路 — `python -m src.main "msg"` 全链路跑通
   - `src/shared/`：RunTask, TaskStatus, CatnipError 五子类, logger, utils
   - `02-queue`：asyncio FIFO 队列、任务状态管理、completion event

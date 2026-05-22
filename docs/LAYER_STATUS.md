@@ -43,59 +43,67 @@
 
 ## 04 Harness
 
-**状态**: 占位实现（Phase 1）
+**状态**: 已实现（Phase 2）
 
 **已实现:**
-- Phase 1 占位：接受 RunTask、标记 done、返回占位结果
+- runId 创建与生命周期管理
+- 调用链串联（Context → Skills → Memory → Runner）
+- final report 生成（steps/tool calls/answer/context summary）
+- EventBus 事件发布（run.started/prompt.composed/run.finished）
 
 **待实现:**
-- runId 创建
-- run 生命周期管理
-- 调用链串联（Context → Skills → Memory → Runner）
-- final report 生成
 - 验收检查
+- safe_git_diff
+- 步数限制策略
+- run 级超时控制
 
 ---
 
 ## 05 Context
 
-**状态**: 未开始（仅 README）
+**状态**: 已实现（Phase 2）
 
-**待实现:**
-- docs 文档读取
-- workspace 扫描与摘要
-- system prompt 构建
-- 开工清单提取
+**已实现:**
+- 关键文档加载（ONBOARD.md / CLAUDE.md / CODEX_ARCHITECTURE.md / CODEX_MASTER_REQUIREMENTS.md）
+- workspace 扫描与文件树摘要
+- system prompt 构建（Project Context + Workspace State + Current Task）
+- 开工清单提取（从 ONBOARD.md 解析）
 
 ---
 
 ## 06 Skills
 
-**状态**: 未开始（仅 README）
+**状态**: 已实现（Phase 2）
 
-**待实现:**
-- 技能注册表
-- 关键词匹配选择
-- SKILL.md 文件加载
-- 技能说明注入
+**已实现:**
+- 技能注册表（5 个技能：coding/testing/debugging/refactor/review）
+- 关键词匹配选择（每技能 5-9 个关键词）
+- SKILL.md 文件加载（skills/<name>/SKILL.md）
+- 技能说明注入（prompt 格式化）
+- 无匹配时默认 fallback 到 coding
 
 ---
 
 ## 07 Memory
 
-**状态**: 未开始（仅 README）
+**状态**: 已实现（Phase 2）
 
-**待实现:**
-- session 级短期记忆
-- 结构化 working memory
-- 持久化 project memory
-- 记忆注入与回写
+**已实现:**
+- MemorySnapshot 数据结构（session_entries / working_set / observations / project_recent / carryover / checklist）
+- WorkingSet 工作对象追踪（focused_file / recent_files / openable_html）
+- JSON 持久化（logs/catnip-memory.json）
+- 记忆裁剪（session 50 条 / observations 20 条 / recent files 10 条）
+- 记忆注入 prompt 生成
 
 ---
 
 ## 08 Runner
 
-**状态**: 未开始（仅 README）
+**状态**: 占位实现（Phase 2）
+
+**已实现:**
+- RunnerResult 数据结构（answer / steps_used / tool_calls_made）
+- Phase 2 占位（返回 mock answer + 上下文长度）
 
 **待实现:**
 - ReAct Loop
@@ -107,11 +115,14 @@
 
 ## 09 EventBus
 
-**状态**: 未开始（仅 README）
+**状态**: 已实现（Phase 2）
+
+**已实现:**
+- 异步事件发布订阅（publish/subscribe/unsubscribe）
+- 事件类型常量（13 种：run.*/agent.*/tool.*/worker.*/prompt.*）
 
 **待实现:**
-- 事件发布订阅
-- 工具调用事件传递
+- 工具调用事件传递（tool.call.requested → result 路由）
 - waitForToolResult
 - Logger 旁路订阅
 
