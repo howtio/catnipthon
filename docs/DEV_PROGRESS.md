@@ -7,7 +7,7 @@
 
 ## 当前版本
 
-`0.0`（骨架 2.0）
+`0.1`（Phase 1 完成：Gateway + Queue + Worker）
 
 ---
 
@@ -18,33 +18,40 @@
 | 版本 | `0.0` |
 | Phase 0（骨架 1.0：基础文档 + 目录） | 已完成 |
 | Phase 0（骨架 2.0：Python 工程化 + 导入策略） | 已完成 |
-| Phase 1（Gateway + Queue + Worker） | 未开始 |
+| Phase 1（Gateway + Queue + Worker） | 已完成 |
 | Phase 2（Harness + Context + Skills + Memory） | 未开始 |
 | Phase 3（Runner + EventBus 骨架） | 未开始 |
 | Phase 4（Tool Registry + Executor 骨架） | 未开始 |
 | Phase 5（最小工具集） | 未开始 |
 | Phase 6（DeepSeek 接入 + tool calling） | 未开始 |
 | Phase 7（日志、验收、final report） | 未开始 |
-| typecheck | 未执行 |
-| 测试 | 未执行 |
+| typecheck | 通过（17 文件 0 问题） |
+| 测试 | 9/9 通过 |
 
 ---
 
 ## 进行中
 
-- 无（骨架 2.0 已完成，等待首次代码施工）
+- 无（Phase 1 已完成，等待 Phase 2）
 
 ---
 
 ## 未开始
 
-- Phase 1：Gateway + Queue + Worker 最小链路
-- Phase 2 ~ 7
+- Phase 2：Harness + Context + Skills + Memory
+- Phase 3 ~ 7
 
 ---
 
 ## 已完成
 
+- Phase 1（2026-05-23）：Gateway + Queue + Worker 最小链路 — `python -m src.main "msg"` 全链路跑通
+  - `src/shared/`：RunTask, TaskStatus, CatnipError 五子类, logger, utils
+  - `02-queue`：asyncio FIFO 队列、任务状态管理、completion event
+  - `03-worker`：消费循环、Harness 调用、错误捕获
+  - `01-gateway`：CLI 解析、任务创建提交、结果等待
+  - `04-harness`：占位实现（标记 done 并返回）
+  - 测试：9 个通过（队列 FIFO、状态转换、错误处理、集成流）
 - Phase 0 骨架 1.0：项目文档体系（ONBOARD.md、CODEX_*.md、施工文档、进度追踪）
 - Phase 0 骨架 2.0（2026-05-23）：
   - Python 工程化：`pyproject.toml`、`.venv/` 虚拟环境、mypy strict 模式、pytest 配置

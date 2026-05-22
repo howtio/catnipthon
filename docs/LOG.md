@@ -56,6 +56,21 @@
 
 ## 最近记录
 
+### 2026-05-23 / Phase 1 / Gateway + Queue + Worker 最小链路
+
+- **版本**: `0.1`
+- **改动部分**:
+  - `src/shared/` — 基础类型（RunTask, TaskStatus）、错误体系（CatnipError 五子类）、logger、utils（create_id）
+  - `02-queue` — QueueLayerApi：asyncio FIFO 队列、入队/出队、任务状态管理（pending→running→done/failed）、completion event 等待
+  - `03-worker` — WorkerLayerApi：消费循环、调用 Harness、错误捕获与状态标记
+  - `01-gateway` — GatewayLayerApi：CLI 参数解析、RunTask 创建、提交 Queue、等待并返回结果
+  - `04-harness` — HarnessLayerApi 占位：接受 RunTask、标记 done、返回占位结果
+  - `src/bootstrap.py` — 依赖组装（App dataclass）
+  - `src/main.py` — 异步启动入口（python -m src.main）
+- **修改文件**: src/__init__.py, src/layers/__init__.py, src/shared/*, src/layers/{gateway_01,queue_02,worker_03,harness_04}/*, src/bootstrap.py, src/main.py, tests/test_queue.py
+- **验证**: mypy 通过（17 文件 0 问题），pytest 9/9 通过，冒烟测试通过（`python -m src.main "phase1 smoke test"` 全链路跑通）
+- **下一步**: Phase 2 — Harness + Context + Skills + Memory
+
 ### 2026-05-23 / Phase 0 / 骨架 2.0 — Python 工程化与目录命名修复
 
 - **版本**: `0.0`（骨架 2.0）

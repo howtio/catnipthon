@@ -7,44 +7,46 @@
 
 ## 01 Gateway
 
-**状态**: 未开始（仅 README）
+**状态**: 已实现（Phase 1）
 
-**待实现:**
-- CLI 参数解析
-- 用户输入校验
-- RunTask 创建
-- 任务提交到 Queue
-- 结果展示
+**已实现:**
+- CLI 参数解析（sys.argv）
+- RunTask 创建（id + user_message）
+- 异步提交到 Queue（enqueue + wait_for_completion）
+- 结果展示（终端输出 done/failed）
 
 ---
 
 ## 02 Queue
 
-**状态**: 未开始（仅 README）
+**状态**: 已实现（Phase 1）
 
-**待实现:**
-- 内存 FIFO 队列
-- 入队/出队
+**已实现:**
+- 内存 FIFO 队列（asyncio.Queue）
+- 入队/出队（enqueue/dequeue）
 - 任务状态管理（pending → running → done / failed）
-- 任务快照和完成等待
+- 任务快照和完成等待（get_task_snapshot / wait_for_completion）
 
 ---
 
 ## 03 Worker
 
-**状态**: 未开始（仅 README）
+**状态**: 已实现（Phase 1）
 
-**待实现:**
-- Worker 消费循环
-- 并发控制
-- Worker 心跳
-- 错误处理与捕获
+**已实现:**
+- Worker 异步消费循环（start/stop）
+- 调用 Harness 处理任务（_process）
+- 错误处理与捕获（try/except → failed）
+- 待实现: 并发控制、Worker 心跳
 
 ---
 
 ## 04 Harness
 
-**状态**: 未开始（仅 README）
+**状态**: 占位实现（Phase 1）
+
+**已实现:**
+- Phase 1 占位：接受 RunTask、标记 done、返回占位结果
 
 **待实现:**
 - runId 创建
@@ -143,10 +145,15 @@
 
 ## Shared
 
-**状态**: 未开始
+**状态**: 已实现（Phase 1）
+
+**已实现:**
+- types: RunTask、TaskStatus
+- logger: get_logger（控制台日志、可扩展 handler）
+- errors: CatnipError、QueueError、WorkerError、GatewayError、HarnessError
+- utils: createId
 
 **待实现:**
-- types: runTask、permission、tool、event、result
-- logger: JSONL 日志、控制台日志
-- errors: CatnipError、PolicyError、ToolError、TimeoutError
-- utils: sleep、createId、safeJson、assertNever
+- types: permission、tool、event、result
+- errors: PolicyError、ToolError、TimeoutError
+- utils: sleep、safeJson、assertNever
