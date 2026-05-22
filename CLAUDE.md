@@ -16,14 +16,16 @@ catnip-agent — Python 实现的 11 层 Coding Agent Runtime。
 
 **以下步骤必须逐项完成，不允许跳过。**
 
-1. 读 `ONBOARD.md`
-2. 读 `docs/DEV_PROGRESS.md`（知道做到哪了）
-3. `git branch --show-current && git status`
-4. 创建远端备份分支并 push：`backup/<YYYYMMDD>-<描述>`
-5. 填写 Session Contract（参考 `CODEX_SESSION_CONTRACT_TEMPLATE.md`）：目标、涉及层、验收标准、非目标
-6. `mypy src/`（确认起点干净）
+1. 激活虚拟环境：`source .venv/bin/activate`（或 `.venv/bin/` 前缀执行命令）
+2. 读 `ONBOARD.md`
+3. 读 `docs/DEV_PROGRESS.md`（知道做到哪了）
+4. `git branch --show-current && git status`
+5. 创建远端备份分支并 push：`backup/<YYYYMMDD>-<描述>`
+6. 加载 API Key：`export $(grep DEEPSEEK_API_KEY apikey.txt | xargs)`（Phase 6 起需要）
+7. 填写 Session Contract（参考 `CODEX_SESSION_CONTRACT_TEMPLATE.md`）：目标、涉及层、验收标准、非目标
+8. `mypy src/`（确认起点干净）
 
-**没做完以上 6 步 = 不允许写代码。**
+**没做完以上 8 步 = 不允许写代码。**
 
 ---
 
@@ -48,7 +50,7 @@ catnip-agent — Python 实现的 11 层 Coding Agent Runtime。
 ## 架构铁律
 
 ```
-01-gateway → 02-queue → 03-worker → 04-harness → 05-context → 06-skills → 07-memory → 08-runner → 09-eventbus → 10-tool-registry → 11-executor
+gateway_01 → queue_02 → worker_03 → harness_04 → context_05 → skills_06 → memory_07 → runner_08 → eventbus_09 → tool_registry_10 → executor_11
 
 Skills 不执行 — 说明书
 Tools 不决策 — 工具箱

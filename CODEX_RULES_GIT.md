@@ -192,7 +192,7 @@ Git tag：
 
 | 项目 | 值 |
 |------|-----|
-| 仓库地址 | `https://github.com/howtio/catnipmvp.git` |
-| SSH | `git@github.com:howtio/catnipmvp.git` |
+| 仓库地址 | `https://github.com/howtio/catnipthon.git` |
+| SSH | `git@github.com:howtio/catnipthon.git` |
 | 默认分支 | `main` |
 | Remote | `origin` |

@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "catnip-agent"
+version = "0.1"
+description = "Python Coding Agent Runtime — 11-layer architecture"
+requires-python = ">=3.12"
+dependencies = [
+    "openai>=1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "mypy>=1.0",
+    "pytest>=8.0",
+]
+
+[tool.mypy]
+strict = true
+exclude = ["tests/"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

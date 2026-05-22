@@ -7,7 +7,7 @@
 
 ## 当前版本
 
-`0.0`
+`0.0`（骨架 2.0）
 
 ---
 
@@ -16,7 +16,8 @@
 | 项目 | 状态 |
 |------|------|
 | 版本 | `0.0` |
-| Phase 0（目录、文档、进度体系） | 已完成 |
+| Phase 0（骨架 1.0：基础文档 + 目录） | 已完成 |
+| Phase 0（骨架 2.0：Python 工程化 + 导入策略） | 已完成 |
 | Phase 1（Gateway + Queue + Worker） | 未开始 |
 | Phase 2（Harness + Context + Skills + Memory） | 未开始 |
 | Phase 3（Runner + EventBus 骨架） | 未开始 |
@@ -31,16 +32,12 @@
 
 ## 进行中
 
-- 无（等待首次代码施工）
+- 无（骨架 2.0 已完成，等待首次代码施工）
 
 ---
 
 ## 未开始
 
-- 初始化 Python 项目（pyproject.toml）
-- 创建 src/main.py、src/bootstrap.py
-- 创建 11 层 wrapper.py / types.py / __init__.py 空骨架
-- 创建 shared/types、shared/logger、shared/errors、shared/utils
 - Phase 1：Gateway + Queue + Worker 最小链路
 - Phase 2 ~ 7
 
@@ -48,9 +45,13 @@
 
 ## 已完成
 
-- 项目文档体系：ONBOARD.md、CODEX_MASTER_REQUIREMENTS.md、CODEX_ARCHITECTURE.md、CODEX_RULES_GIT.md、CODEX_RULES_TESTING.md、CLAUDE.md
-- 施工文档：CONSTRUCTION_PLAN.md、AGENT_LOOP.md、TOOL_POLICY.md、DEBUG_GUIDE.md
-- 项目配置：.env.example、.gitignore、.local-secrets/
-- 11 层目录结构 + README.md（空代码骨架）
+- Phase 0 骨架 1.0：项目文档体系（ONBOARD.md、CODEX_*.md、施工文档、进度追踪）
+- Phase 0 骨架 2.0（2026-05-23）：
+  - Python 工程化：`pyproject.toml`、`.venv/` 虚拟环境、mypy strict 模式、pytest 配置
+  - 目录命名：层目录使用 `gateway_01`、`queue_02` 等（名称_数字，标准 Python import 可用）
+  - API Key 管理：`apikey.txt`（用户真实 key，gitignore）+ `apikey.txt.example`（模板，进仓库）
+  - Import 策略：`name_XX` 格式支持 `from src.layers.queue_02 import QueueLayerApi` 标准语法
+  - 文档补全：CODEX_ARCHITECTURE.md 新增 Import 策略章节，CODEX_RULES_GIT.md 修正仓库 URL，CLAUDE.md 开工流程补 venv/api-key 步骤，ONBOARD.md 新增开发环境设置和 apikey 说明
+- 11 层目录结构 + README.md（骨架只读文档）
 - 5 个 Skill 文件（coding/testing/debugging/refactor/review）
-- 进度追踪体系：docs/DEV_PROGRESS.md、docs/LOG.md、docs/LAYER_STATUS.md、docs/logs/LOG-0.0.md
+- `.gitignore` 覆盖：`.venv/`、`__pycache__/`、`apikey.txt`、`.local-secrets/`、IDE/OS 残留

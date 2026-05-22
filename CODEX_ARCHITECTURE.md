@@ -319,6 +319,20 @@ Executor 是唯一副作用边界。
 
 ## 跨层 Import 规则
 
+### 目录命名与 Python 导入
+
+层目录使用 `name_XX` 格式（名称_数字），如 `gateway_01`、`queue_02`。这是合法的 Python 包名，支持标准 `import` 语法：
+
+```python
+# 跨层导入：通过 __init__.py 暴露的 wrapper 和 types
+from src.layers.queue_02 import QueueLayerApi, create_queue_layer
+from src.layers.gateway_01 import GatewayLayerApi
+```
+
+层内部文件使用**相对导入**互相引用，不跨层。依赖通过构造函数注入。bootstrap.py 从底层向顶层组装各层。
+
+### 铁律
+
 ```
 1. 每层只能通过 __init__.py 暴露 wrapper 和 types
 2. 跨层调用只能 import 对方 __init__.py（或 from layer import wrapper）

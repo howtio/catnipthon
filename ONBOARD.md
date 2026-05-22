@@ -37,7 +37,7 @@ Executor 不做推理    — 只做 guard → 执行 → 返回结果
 | 项目 | 状态 |
 |------|------|
 | 版本 | `0.0` |
-| 代码 | 无（纯文档骨架） |
+| 代码 | 无（骨架 2.0：Python 工程化就绪） |
 | typecheck | 未执行 |
 | 测试 | 未执行 |
 
@@ -81,7 +81,7 @@ Executor 不做推理    — 只做 guard → 执行 → 返回结果
 | 看当前进度 | `docs/DEV_PROGRESS.md` |
 | 看施工记录 | `docs/LOG.md` |
 | 看每层实现状态 | `docs/LAYER_STATUS.md` |
-| 了解某层职责边界 | `src/layers/XX-xxx/README.md` |
+| 了解某层职责边界 | `src/layers/xxx_XX/README.md` |
 
 ---
 
@@ -90,6 +90,7 @@ Executor 不做推理    — 只做 guard → 执行 → 返回结果
 **以下每一步都必须完成。跳过 = 不允许写代码。**
 
 ```
+□ 0. 激活虚拟环境：source .venv/bin/activate
 □ 1. 读 ONBOARD.md
 □ 2. 读 docs/DEV_PROGRESS.md
 □ 3. git branch --show-current && git status
@@ -123,7 +124,24 @@ Executor 不做推理    — 只做 guard → 执行 → 返回结果
 
 ---
 
-## 9. 环境变量速查
+## 9. 开发环境设置
+
+```bash
+# 创建虚拟环境（仅首次）
+python3 -m venv .venv
+
+# 激活虚拟环境
+source .venv/bin/activate
+
+# 安装开发依赖
+.venv/bin/pip install mypy pytest openai
+```
+
+虚拟环境 `.venv/` 已在 `.gitignore` 中排除，不进仓库。
+
+---
+
+## 10. 环境变量速查
 
 | 变量 | 作用 | 默认值 |
 |------|------|--------|
@@ -140,16 +158,20 @@ Executor 不做推理    — 只做 guard → 执行 → 返回结果
 
 ---
 
-## 10. DeepSeek API Key 存放
+## 11. DeepSeek API Key 存放
 
 ```
 catnipthon/
-├── .local-secrets/          ← gitignore，不进仓库
-│   └── deepseek.env         ← DEEPSEEK_API_KEY=sk-xxx
-├── .env.example             ← 占位符，进仓库
+├── apikey.txt                ← gitignore，不进仓库（推荐）
+├── apikey.txt.example        ← 模板文件，进仓库
+├── .local-secrets/           ← gitignore，不进仓库
+│   └── deepseek.env          ← DEEPSEEK_API_KEY=sk-xxx
+├── .env.example              ← 占位符，进仓库
 ```
 
-## 11. 安全红线
+加载方式：`export $(grep DEEPSEEK_API_KEY apikey.txt | xargs)`
+
+## 12. 安全红线
 
 - **绝对禁止**把真实 API Key 写进仓库的任何文件
 - **绝对禁止**把密钥写进 git 历史

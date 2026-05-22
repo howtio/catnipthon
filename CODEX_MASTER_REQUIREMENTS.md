@@ -185,5 +185,5 @@ CODEX_SESSION_CONTRACT_TEMPLATE.md  ← 马拉松 Session 契约模板
 docs/DEV_PROGRESS.md                ← 当前进度、待续任务
 docs/LOG.md                         ← 施工日志（索引 + 最近条目）
 docs/LAYER_STATUS.md                ← 11 层实现状态一览
-src/layers/XX-xxx/README.md         ← 每层职责、允许/禁止、依赖
+src/layers/xxx_XX/README.md         ← 每层职责、允许/禁止、依赖
 ```
