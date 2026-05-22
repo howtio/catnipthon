@@ -39,11 +39,11 @@
 
 ## 验收标准
 
-- [ ] `mypy src/` 通过
-- [ ] `pytest` 通过
-- [ ] `python -m src.main "phase2 smoke test"` 输出 run 生命周期事件
-- [ ] `docs/LOG.md` 已追加记录（版本号 `0.2`）
-- [ ] git push
+- [x] `mypy src/` 通过（28 文件 0 问题）
+- [x] `pytest` 通过（38/38）
+- [x] `python -m src.main "phase2 smoke test"` 输出 run 生命周期事件
+- [x] `docs/LOG.md` 已追加记录（版本号 `0.2`）
+- [x] git push（提交号 `5f64a02`）
 
 ## 非目标（明确不做）
 
