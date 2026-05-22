@@ -34,12 +34,15 @@ Executor 不做推理    — 只做 guard → 执行 → 返回结果
 
 ## 4. 当前状态
 
+> 精确版本号见 `pyproject.toml` 的 `version` 字段（单一真相来源）。
+> 详细进度见 `docs/DEV_PROGRESS.md`。
+
 | 项目 | 状态 |
 |------|------|
-| 版本 | `0.0` |
-| 代码 | 无（骨架 2.0：Python 工程化就绪） |
-| typecheck | 未执行 |
-| 测试 | 未执行 |
+| 版本 | 见 `pyproject.toml`（当前 ≈ 0.2） |
+| 代码 | Phase 1+2 已完成，5 层已实现 |
+| typecheck | mypy strict 模式，28 文件 0 问题 |
+| 测试 | pytest + pytest-asyncio，38/38 通过 |
 
 ---
 
@@ -82,6 +85,7 @@ Executor 不做推理    — 只做 guard → 执行 → 返回结果
 | 看施工记录 | `docs/LOG.md` |
 | 看每层实现状态 | `docs/LAYER_STATUS.md` |
 | 了解某层职责边界 | `src/layers/xxx_XX/README.md` |
+| CLI 开机动画复用 | `docs/CLI_STYLE.md` |
 
 ---
 

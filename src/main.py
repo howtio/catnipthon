@@ -4,6 +4,7 @@ import asyncio
 
 from src.bootstrap import bootstrap
 from src.shared import get_logger
+from src.shared.cli import print_header, print_result_fail, print_result_ok, print_task_bar
 
 
 async def main() -> None:
@@ -12,16 +13,16 @@ async def main() -> None:
     worker_task = asyncio.create_task(app.worker.start())
 
     user_message = app.gateway.parse_args()
-    log.info("Starting with message: %s", user_message)
+
+    print_header()
+    print_task_bar(user_message)
 
     try:
         result = await app.gateway.submit(user_message)
         if result.status == "done":
-            print(f"\n✓ Task completed: {result.id}")
-            print(f"  Result: {result.result}")
+            print_result_ok(result.id, result.result or "(no output)")
         else:
-            print(f"\n✗ Task failed: {result.id}")
-            print(f"  Error: {result.error}")
+            print_result_fail(result.id, result.error)
     finally:
         app.worker.stop()
         worker_task.cancel()
