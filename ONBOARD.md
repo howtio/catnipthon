@@ -40,19 +40,19 @@ Executor 不做推理    — 只做 guard → 执行 → 返回结果
 
 | 项目 | 状态 |
 |------|------|
-| 版本 | 见 `pyproject.toml`（当前 ≈ 0.2） |
-| 代码 | Phase 1+2 已完成，5 层已实现 |
-| typecheck | mypy strict 模式，28 文件 0 问题 |
-| 测试 | pytest + pytest-asyncio，38/38 通过 |
+| 版本 | 见 `pyproject.toml`（脚手架 3.0，代码 0.0） |
+| 代码 | 纯脚手架，11 层待实现 |
+| typecheck | mypy strict 模式，shared 组件通过 |
+| 测试 | 暂无（纯脚手架） |
 
 ---
 
 ## 5. 版本规则
 
 ```
-0.0  →  骨架搭建、文档体系、目录结构
+0.0  →  脚手架 3.0（文档体系 + 工程化 + CLI动画）← 当前
 0.1  →  Phase 1 完成（Gateway + Queue + Worker）
-0.2  →  Phase 2 完成（Harness + Context + Skills + Memory）← 当前
+0.2  →  Phase 2 完成（Harness + Context + Skills + Memory）
 0.3  →  Phase 3 完成（Runner + EventBus 骨架）
 0.4  →  Phase 4 完成（Tool Registry + Executor 骨架）
 0.5  →  Phase 5 完成（最小工具集可用）

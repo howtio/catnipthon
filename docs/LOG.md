@@ -56,6 +56,23 @@
 
 ## 最近记录
 
+### 2026-05-23 / 脚手架 3.0 — 马拉松接力 + 防漂移 + CLI开机动画组件化
+
+- **版本**: `0.0`（脚手架 3.0）
+- **改动部分**:
+  - 剥离所有 Phase 1/2 实现代码，回归纯脚手架状态
+  - CLI 开机动画组件化：`src/shared/cli.py`（TITLE/SUBTITLE/LAYERS 可覆盖）
+  - 版本管理：`src/shared/version.py`（pyproject.toml 单一真相源）
+  - 马拉松自动接力规则：CLAUDE.md 新增最高优先级规则
+  - 文档防漂移机制：收尾流程新增版本同步 + 漂移检查步骤
+  - CLI 风格文档：`docs/CLI_STYLE.md`
+  - ONBOARD.md：架构图命名修正 + §13 脚手架复用指南
+  - 层 __init__.py 清空为占位符，bootstrap.py/main.py 简化为脚手架模板
+  - 删除所有测试文件和 Session Contract（纯脚手架不需要）
+- **修改文件**: 删除 17 个实现文件，重写 5 个文档 + bootstrap/main
+- **验证**: mypy 通过（shared 组件），CLI 开机动画正常
+- **下一步**: 基于脚手架 3.0 重新开始 Phase 1 施工
+
 ### 2026-05-23 / Phase 2 / Harness + Context + Skills + Memory + EventBus
 
 - **版本**: `0.2`
