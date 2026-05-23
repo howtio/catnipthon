@@ -19,7 +19,8 @@
 | 脚手架 1.0（基础文档 + 目录） | 已完成 |
 | 脚手架 2.0（Python 工程化 + 导入策略） | 已完成 |
 | 脚手架 3.0（马拉松接力 + 防漂移 + CLI开机动画） | 已完成 |
-| Phase 1（Gateway + Queue + Worker） | 未开始 |
+| Phase 1（Gateway + Queue + Worker） | 未开始（曾实现后在 3.0 重构中剥离） |
+| Phase 2（Harness + Context + Skills + Memory） | 未开始（曾实现后在 3.0 重构中剥离） |
 | Phase 2（Harness + Context + Skills + Memory） | 未开始 |
 | Phase 3（Runner + EventBus 骨架） | 未开始 |
 | Phase 4（Tool Registry + Executor 骨架） | 未开始 |

@@ -15,7 +15,7 @@ Runner 不直接读写文件，不直接执行 shell。
 ## 文件结构
 
 ```
-08-runner/
+runner_08/
   __init__.py            — 导出 wrapper 和 types
   wrapper.py             — 本层唯一对外入口
   types.py               — 本层类型定义

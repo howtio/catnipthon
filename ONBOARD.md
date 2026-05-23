@@ -95,7 +95,7 @@ Executor 不做推理    — 只做 guard → 执行 → 返回结果
 **以下每一步都必须完成。跳过 = 不允许写代码。**
 
 ```
-□ 0. 激活虚拟环境：.venv/bin/python --version 确认
+□ 0. 激活虚拟环境：`.venv\Scripts\python --version`（Windows）或 `.venv/bin/python --version`（Linux/macOS）确认
 □ 1. 读 ONBOARD.md
 □ 2. 读 docs/DEV_PROGRESS.md
 □ 3. git branch --show-current && git status
@@ -136,13 +136,17 @@ Executor 不做推理    — 只做 guard → 执行 → 返回结果
 
 ```bash
 # 创建虚拟环境（仅首次）
-python3 -m venv .venv
+python -m venv .venv
 
-# 激活虚拟环境
-source .venv/bin/activate
+# 激活虚拟环境（Windows）
+.venv\Scripts\activate
+# 或（Linux/macOS）
+# source .venv/bin/activate
 
-# 安装开发依赖
-.venv/bin/pip install mypy pytest pytest-asyncio openai
+# 安装开发依赖（Windows）
+.venv\Scripts\pip install mypy pytest pytest-asyncio openai
+# 或（Linux/macOS）
+# .venv/bin/pip install mypy pytest pytest-asyncio openai
 ```
 
 虚拟环境 `.venv/` 已在 `.gitignore` 中排除，不进仓库。
@@ -162,7 +166,7 @@ source .venv/bin/activate
 | `CATNIP_WORKER_COUNT` | Worker 并发数 | `1` |
 | `CATNIP_WORKER_HEARTBEAT_MS` | Worker 心跳间隔 | `5000` |
 | `CATNIP_MEMORY_STORAGE_FILE` | 记忆持久化路径 | `logs/catnip-memory.json` |
-| `CATNIP_BROWSER_OPEN_BIN` | 浏览器打开命令 | `xdg-open` |
+| `CATNIP_BROWSER_OPEN_BIN` | 浏览器打开命令 | `start`（Windows） / `xdg-open`（Linux/macOS） |
 
 ---
 
@@ -177,7 +181,10 @@ catnipthon/
 ├── .env.example              ← 占位符，进仓库
 ```
 
-加载方式：`export $(grep DEEPSEEK_API_KEY apikey.txt | xargs)`
+加载方式：
+- **Git Bash / Linux/macOS**: `export $(grep DEEPSEEK_API_KEY apikey.txt | xargs)`
+- **PowerShell**: `Get-Content apikey.txt | ForEach-Object { $k,$v = $_ -split '='; if ($k -eq 'DEEPSEEK_API_KEY') { Set-Item -Path "env:$k" -Value $v } }`
+- **cmd.exe**: 暂不支持，建议用 PowerShell 或 Git Bash
 
 ---
 

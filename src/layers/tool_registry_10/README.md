@@ -14,7 +14,7 @@ Executor 才负责"工具怎么执行"。
 ## 文件结构
 
 ```
-10-tool-registry/
+tool_registry_10/
   __init__.py           — 导出 wrapper 和 types
   wrapper.py            — 本层唯一对外入口
   types.py              — 本层类型定义
@@ -39,8 +39,10 @@ Executor 才负责"工具怎么执行"。
 | fs | list_files, read_file, write_file, patch_file |
 | shell | shell_exec |
 | vcs | git_diff |
-| browser | open_browser, open_url |
-| web | web_search, open_browser_search |
+| browser ⚠️ | open_browser, open_url |
+| web ⚠️ | web_search, open_browser_search |
+
+⚠️ browser 和 web 分类属于 **1.x 扩展**，不在 MVP（1.0）范围内。
 
 ## 依赖
 

@@ -7,7 +7,7 @@
 ## 文件结构
 
 ```
-03-worker/
+worker_03/
   __init__.py           — 导出 wrapper 和 types
   wrapper.py            — 本层唯一对外入口
   types.py              — 本层类型定义

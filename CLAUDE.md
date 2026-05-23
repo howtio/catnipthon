@@ -35,12 +35,12 @@ catnip-agent — Python 实现的 11 层 Coding Agent Runtime。
 
 **以下步骤必须逐项完成，不允许跳过。**
 
-1. 激活虚拟环境：`.venv/bin/python --version` 确认可用
+1. 激活虚拟环境：`.venv\Scripts\python --version`（Windows）或 `.venv/bin/python --version`（Linux/macOS）确认可用
 2. 读 `ONBOARD.md`
 3. 读 `docs/DEV_PROGRESS.md`（知道做到哪了）
 4. `git branch --show-current && git status`
 5. 创建远端备份分支并 push：`backup/<YYYYMMDD>-<phaseN>`
-6. 加载 API Key：`export $(grep DEEPSEEK_API_KEY apikey.txt | xargs)`（Phase 6 起需要）
+6. 加载 API Key：`export $(grep DEEPSEEK_API_KEY apikey.txt | xargs)`（Git Bash/Linux/macOS）或 PowerShell `Get-Content apikey.txt | ForEach-Object { $k,$v = $_ -split '='; if ($k -eq 'DEEPSEEK_API_KEY') { Set-Item -Path "env:$k" -Value $v } }`（Phase 6 起需要）
 7. 填写 Session Contract（参考 `CODEX_SESSION_CONTRACT_TEMPLATE.md`）：目标、涉及层、验收标准、非目标
 8. `mypy src/`（确认起点干净）
 
@@ -146,6 +146,8 @@ Executor 不做推理 — 只做 guard → 执行 → 返回结果
 | `pytest` | 运行全部测试 |
 | `pytest tests/ -v` | 详细模式 |
 | `python -m src.main "..."` | 冒烟测试 |
+|
+> Windows 用户：如果 `.venv\Scripts\python` 找不到模块，确保已激活虚拟环境（`.venv\Scripts\activate`）|
 
 ---
 

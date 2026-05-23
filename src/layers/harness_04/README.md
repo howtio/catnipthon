@@ -7,7 +7,7 @@
 ## 文件结构
 
 ```
-04-harness/
+harness_04/
   __init__.py           — 导出 wrapper 和 types
   wrapper.py            — 本层唯一对外入口
   types.py              — 本层类型定义

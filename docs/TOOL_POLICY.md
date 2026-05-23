@@ -76,19 +76,14 @@
 
 ## 始终禁止
 
-- `rm`
-- `rm -rf`
+- `rm` / `rm -rf`
 - `sudo`
-- `chmod`
-- `chown`
-- `curl`
-- `wget`
-- `ssh`
-- `scp`
+- `chmod` / `chown`
+- `curl` / `wget`
+- `ssh` / `scp`
 - `git push`
 - `pip publish` / `twine upload`
 - `docker`
-- `powershell`
 
 ---
 

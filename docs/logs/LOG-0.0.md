@@ -1,5 +1,47 @@
 # 0.0 施工日志归档
 
+## 2026-05-23 / Phase 0 / 骨架 2.0 — Python 工程化与目录命名修复
+
+### 版本
+- `0.0`（骨架 2.0）
+
+### 目标
+Python 工程化初始化 + 目录命名修复（01-gateway → gateway_01）。
+
+### 开工检查
+- 基于脚手架 1.0 继续
+
+### 本次修改
+- 目录命名：`01-gateway` → `gateway_01`、`02-queue` → `queue_02` 等（名称_数字，标准 Python import 可用）
+- Python 工程化：新增 `pyproject.toml`（mypy strict / pytest / openai 依赖）
+- 虚拟环境：`.venv/` + ONBOARD.md 设置说明
+- API Key 管理：`apikey.txt`（用户真实 key，gitignore）+ `apikey.txt.example`（模板，进仓库）
+- Import 策略：CODEX_ARCHITECTURE.md 新增标准导入章节（`from src.layers.queue_02 import ...`）
+- 文档修订：CLAUDE.md 开工流程补 venv+apikey 步骤，CODEX_RULES_GIT.md 修正仓库 URL，DEV_PROGRESS.md 升级到骨架 2.0
+
+### 改动部分
+- 目录结构：全部 11 层目录重命名
+- 文档：多处同步更新
+
+### 修改文件
+CLAUDE.md、ONBOARD.md、CODEX_ARCHITECTURE.md、CODEX_MASTER_REQUIREMENTS.md、CODEX_RULES_GIT.md、docs/DEV_PROGRESS.md、docs/LOG.md、.gitignore、pyproject.toml、apikey.txt.example、11 层 README.md（目录移动）
+
+### 验证结果
+- mypy：无可检测代码（纯骨架）
+- pytest：无可执行测试
+
+### 教训
+连字符目录 Python 无法 import；数字前缀也不行（语法错误）；`name_XX`（名称_数字）是唯一同时满足排序和 Python import 的方案；骨架阶段就该有 pyproject.toml 和 venv；API key 用根目录 txt + .gitignore 最方便
+
+### 回滚判断
+- 无需回滚
+
+### 风险
+- 无代码可验证
+
+### 下一步
+Phase 1 实现 Gateway + Queue + Worker
+
 ## 2026-05-23 / Phase 0 / 项目文档骨架初始化
 
 ### 版本

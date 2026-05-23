@@ -15,19 +15,25 @@ git clone git@github.com:howtio/catnipthon.git
 cd catnipthon
 
 # 2. 创建虚拟环境
-python3 -m venv .venv
+python -m venv .venv
 
-# 3. 安装依赖
-.venv/bin/pip install mypy pytest openai
+# 3. 激活虚拟环境（Windows）
+.venv\Scripts\activate
+# 或（Linux/macOS）
+# source .venv/bin/activate
 
-# 4. 配置 API Key
-cp apikey.txt.example apikey.txt
+# 4. 安装依赖
+.venv\Scripts\pip install mypy pytest openai
+
+# 5. 配置 API Key
+cp apikey.txt.example apikey.txt        # Git Bash / Linux/macOS
+# copy apikey.txt.example apikey.txt    # Windows cmd.exe
 # 编辑 apikey.txt，填入你的 DeepSeek API Key
 ```
 
 ## 当前状态
 
-**版本 0.0**（骨架 2.0）— 文档体系 + Python 工程化就绪，等待 Phase 1 开发。
+**版本 0.0**（脚手架 3.0）— 文档体系 + Python 工程化 + 马拉松自动接力 + CLI 开机动画就绪，等待 Phase 1 开发。
 
 ## 文档
 
