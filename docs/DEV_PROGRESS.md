@@ -19,6 +19,7 @@
 | 脚手架 1.0（基础文档 + 目录） | 已完成 |
 | 脚手架 2.0（Python 工程化 + 导入策略） | 已完成 |
 | 脚手架 3.0（马拉松接力 + 防漂移 + CLI开机动画） | 已完成 |
+| Windows 特化（路径/命令/配置 Windows 优先） | 已完成 |
 | Phase 1（Gateway + Queue + Worker） | 未开始（曾实现后在 3.0 重构中剥离） |
 | Phase 2（Harness + Context + Skills + Memory） | 未开始（曾实现后在 3.0 重构中剥离） |
 | Phase 2（Harness + Context + Skills + Memory） | 未开始 |
@@ -60,3 +61,9 @@
   - 脚手架复用指南（ONBOARD.md §13）
   - 5 个 Skill 文件（coding/testing/debugging/refactor/review）
   - `.gitignore` 覆盖：`.venv/`、`__pycache__/`、`apikey.txt`、`.local-secrets/`、IDE/OS 残留
+- Windows 特化（2026-05-23）：
+  - 路径分隔符统一使用 Windows 风格（`\`），文档同时保留 Unix 写法
+  - `.venv\Scripts\` 作为首要虚拟环境路径
+  - API Key 加载新增 PowerShell 命令
+  - 浏览器默认命令设为 `start`（Windows）
+  - CLAUDE.md / ONBOARD.md 全面同步 Windows 优先指令

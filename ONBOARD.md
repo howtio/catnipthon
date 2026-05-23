@@ -6,7 +6,7 @@
 
 ## 1. 我是谁
 
-**catnip-agent** — Python 实现的本地 Coding Agent Runtime。
+**catnip-agent** — **Windows 特化**的 Python 实现本地 Coding Agent Runtime。
 
 ---
 

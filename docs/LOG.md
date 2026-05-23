@@ -10,6 +10,8 @@
 | 版本 | 文件 |
 |------|------|
 | 0.0 | `docs/logs/LOG-0.0.md` |
+| 0.1 | `docs/logs/LOG-0.0.md`（已剥离） |
+| 0.2 | `docs/logs/LOG-0.0.md`（已剥离） |
 
 ---
 
@@ -56,6 +58,19 @@
 
 ## 最近记录
 
+### 2026-05-23 / Windows 特化 — catnipthon 全面 Windows 优先适配
+
+- **版本**: `0.0`（Windows 特化脚手架 3.0）
+- **改动部分**:
+  - 文档修复：README 版本号修正、11 层 README 目录名修正、LOG 归档、Phase 回滚历史标注
+  - Windows 特化：路径改为 Windows 优先（`\`）、`.venv\Scripts\` 首要路径、PowerShell API Key 加载
+  - 浏览器默认命令设为 `start`（Windows）
+  - CLAUDE.md / ONBOARD.md / 各文档全面同步 Windows 优先指令
+  - 主线仓库标注：`https://github.com/howtio/catnipthon`
+- **修改文件**: 21 个文档文件修复 + 5 个文件 Windows 特化
+- **验证**: mypy 通过（shared 组件）
+- **下一步**: Phase 1 — Gateway + Queue + Worker
+
 ### 2026-05-23 / 脚手架 3.0 — 马拉松接力 + 防漂移 + CLI开机动画组件化
 
 - **版本**: `0.0`（脚手架 3.0）
@@ -87,18 +102,3 @@
 - **修改文件**: src/layers/{eventbus_09,context_05,skills_06,memory_07,harness_04,runner_08}/*, src/bootstrap.py, tests/*
 - **验证**: mypy 通过（28 文件 0 问题），pytest 38/38 通过，冒烟测试通过（事件发布、文档加载 16199 chars、技能匹配 "testing"、final report 生成）
 - **下一步**: Phase 3 — Runner + EventBus 完善（tool.call.requested/result 路由）
-
-### 2026-05-23 / Phase 1 / Gateway + Queue + Worker 最小链路
-
-- **版本**: `0.1`
-- **改动部分**:
-  - `src/shared/` — 基础类型（RunTask, TaskStatus）、错误体系（CatnipError 五子类）、logger、utils（create_id）
-  - `02-queue` — QueueLayerApi：asyncio FIFO 队列、入队/出队、任务状态管理（pending→running→done/failed）、completion event 等待
-  - `03-worker` — WorkerLayerApi：消费循环、调用 Harness、错误捕获与状态标记
-  - `01-gateway` — GatewayLayerApi：CLI 参数解析、RunTask 创建、提交 Queue、等待并返回结果
-  - `04-harness` — HarnessLayerApi 占位：接受 RunTask、标记 done、返回占位结果
-  - `src/bootstrap.py` — 依赖组装（App dataclass）
-  - `src/main.py` — 异步启动入口（python -m src.main）
-- **修改文件**: src/__init__.py, src/layers/__init__.py, src/shared/*, src/layers/{gateway_01,queue_02,worker_03,harness_04}/*, src/bootstrap.py, src/main.py, tests/test_queue.py
-- **验证**: mypy 通过（17 文件 0 问题），pytest 9/9 通过，冒烟测试通过（`python -m src.main "phase1 smoke test"` 全链路跑通）
-- **下一步**: Phase 2 — Harness + Context + Skills + Memory

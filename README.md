@@ -1,5 +1,8 @@
 # catnip-agent
 
+> 🪟 **Windows 特化版本** — 本仓库为 Windows 平台优化的 catnip-agent 脚手架。
+> 所有路径、命令、默认配置均以 **Windows 优先**，同时兼容 Linux/macOS。
+
 Python 实现的 11 层 Coding Agent Runtime。
 
 ```
@@ -33,7 +36,9 @@ cp apikey.txt.example apikey.txt        # Git Bash / Linux/macOS
 
 ## 当前状态
 
-**版本 0.0**（脚手架 3.0）— 文档体系 + Python 工程化 + 马拉松自动接力 + CLI 开机动画就绪，等待 Phase 1 开发。
+**版本 0.0**（Windows 特化脚手架 3.0）— 文档体系 + Python 工程化 + 马拉松自动接力 + CLI 开机动画就绪，等待 Phase 1 开发。
+
+主线仓库：[https://github.com/howtio/catnipthon](https://github.com/howtio/catnipthon)
 
 ## 文档
 
