@@ -7,7 +7,7 @@ SHELL_EXEC: ToolDef = ToolDef(
     name="shell_exec",
     description="Run a shell command. Blocking w/ timeout.",
     category="shell",
-    permission="high",
+    permission="medium",
     requires=["command_guard"],
     parameters={
         "type": "object",
