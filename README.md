@@ -36,7 +36,7 @@ cp apikey.txt.example apikey.txt        # Git Bash / Linux/macOS
 
 ## 当前状态
 
-**版本 0.0**（Windows 特化脚手架 3.0）— 文档体系 + Python 工程化 + 马拉松自动接力 + CLI 开机动画就绪，等待 Phase 1 开发。
+**版本 7.0**（Windows 特化脚手架 3.0）
 
 主线仓库：[https://github.com/howtio/catnipthon](https://github.com/howtio/catnipthon)
 
