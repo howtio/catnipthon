@@ -22,6 +22,26 @@ class QueueLayerApi:
         """Pop the next pending task (status → running)."""
         return dequeue_task(self._queue)
 
+    def wait_for_task(self, timeout: float | None = None) -> RunTask | None:
+        """Block until a task is available, then dequeue it."""
+        return self._queue.wait_for_task(timeout)
+
+    def append_requirement(self, task_id: str, requirement: str) -> None:
+        """Append a mid-execution requirement to a running task."""
+        self._store.append_requirement(task_id, requirement)
+
+    def update_heartbeat(self, task_id: str) -> None:
+        """Refresh the heartbeat timestamp for a running task."""
+        self._store.update_heartbeat(task_id)
+
+    def get_stale_tasks(self, timeout: float) -> list[RunTask]:
+        """Return running tasks whose heartbeat is older than *timeout*."""
+        return self._store.get_stale_tasks(timeout)
+
+    def get_running_tasks(self) -> list[RunTask]:
+        """Return all tasks currently in 'running' status."""
+        return self._store.get_running()
+
     def get_task(self, task_id: str) -> RunTask | None:
         """Look up a task by ID."""
         return self._queue.get_task(task_id)

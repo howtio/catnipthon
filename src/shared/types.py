@@ -17,3 +17,5 @@ class RunTask:
     finished_at: float | None = None
     result: str | None = None
     error: str | None = None
+    appended_requirements: list[str] = field(default_factory=list)
+    last_heartbeat_at: float | None = None

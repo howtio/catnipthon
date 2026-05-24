@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import os
 from collections.abc import Callable
 from dataclasses import dataclass
+from pathlib import Path
 
 from src.shared.types import RunTask
 from src.shared.jsonl_logger import attach_jsonl_logger
@@ -18,6 +20,20 @@ from src.layers.runner_08 import RunnerLayerApi
 from src.layers.tool_registry_10 import ToolRegistryLayerApi
 from src.layers.executor_11 import ExecutorLayerApi
 from src.layers.harness_04 import HarnessLayerApi
+
+
+def _ensure_api_key() -> None:
+    """Load DEEPSEEK_API_KEY from apikey.txt if env var not set."""
+    if os.environ.get("DEEPSEEK_API_KEY"):
+        return
+    key_file = Path(__file__).resolve().parent.parent / "apikey.txt"
+    if key_file.exists():
+        for line in key_file.read_text(encoding="utf-8").strip().splitlines():
+            line = line.strip()
+            if line.startswith("DEEPSEEK_API_KEY="):
+                val = line.split("=", 1)[1].strip()
+                if val:
+                    os.environ["DEEPSEEK_API_KEY"] = val
 
 
 @dataclass
@@ -37,6 +53,8 @@ class App:
 
 def bootstrap() -> App:
     """Create and wire all layer instances (Phase 3)."""
+    _ensure_api_key()
+
     # No-dependency layers (instantiation order doesn't matter within this group)
     queue = QueueLayerApi()
     eventbus = EventBusLayerApi()

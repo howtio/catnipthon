@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 from src.shared.types import RunTask
 from src.layers.eventbus_09 import EventBusLayerApi
 from src.layers.context_05 import ContextLayerApi
@@ -26,8 +28,14 @@ class HarnessLayerApi:
         self._memory = memory
         self._runner = runner
 
-    def run(self, task: RunTask) -> str:
-        """Execute a complete run lifecycle."""
+    def run(self, task: RunTask, conversation_history: list[dict[str, Any]] | None = None) -> str:
+        """Execute a complete run lifecycle.
+
+        Args:
+            conversation_history: accumulated messages from prior turns
+                for multi-turn conversation support.
+        """
         return run_lifecycle(
-            task, self._eventbus, self._context, self._skills, self._memory, self._runner
+            task, self._eventbus, self._context, self._skills, self._memory, self._runner,
+            conversation_history=conversation_history,
         )

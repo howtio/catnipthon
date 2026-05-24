@@ -75,9 +75,34 @@ class MemoryLayerApi:
 
         return "\n".join(parts)
 
+    def add_conversation_turn(self, user_msg: str, assistant_reply: str) -> None:
+        """Record a user ↔ assistant turn in conversation history."""
+        self._memory.conversation_history.append({
+            "role": "user", "content": user_msg,
+        })
+        self._memory.conversation_history.append({
+            "role": "assistant", "content": assistant_reply,
+        })
+        if len(self._memory.conversation_history) > 40:
+            self._memory.conversation_history = self._memory.conversation_history[-40:]
+        self._memory.session_entries.append(f"[{time.strftime('%H:%M:%S')}] Q: {user_msg[:60]}")
+        self._save()
+
+    def get_conversation_history(self, max_turns: int = 10) -> list[dict[str, str]]:
+        """Return recent conversation history for injection into agent context."""
+        # Return last max_turns*2 messages (each turn = user + assistant)
+        n = max_turns * 2
+        return self._memory.conversation_history[-n:]
+
+    def set_conversation_history(self, history: list[dict[str, str]]) -> None:
+        """Replace full conversation history (used by REPL to sync)."""
+        self._memory.conversation_history = list(history)
+        self._save()
+
     def clear_session(self) -> None:
         self._memory.session_entries.clear()
         self._memory.observations.clear()
+        self._memory.conversation_history.clear()
         self._save()
 
     # --- internals ---

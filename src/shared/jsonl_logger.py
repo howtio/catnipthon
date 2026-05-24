@@ -14,11 +14,16 @@ _ALL_EVENTS = [
     event_types.AGENT_STEP_FINISHED,
     event_types.AGENT_PLAN_GENERATED,
     event_types.AGENT_REASONING_SUMMARY,
+    event_types.AGENT_REASONING_CHUNK,
     event_types.AGENT_ANSWER_PRODUCED,
     event_types.TOOL_CALL_REQUESTED,
     event_types.TOOL_CALL_RESULT,
     event_types.TOOL_CALL_FAILED,
     event_types.WORKER_HEARTBEAT,
+    event_types.QUEUE_HEARTBEAT,
+    event_types.LLM_USAGE,
+    event_types.AGENT_ASKING_USER,
+    event_types.AGENT_USER_RESPONSE,
     event_types.PROMPT_COMPOSED,
 ]
 

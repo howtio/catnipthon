@@ -14,6 +14,7 @@ def build_final_report(run: RunInfo) -> FinalReport:
         modified_files=list(run.modified_files),
         risks=[],
         rollback_guide="",
+        token_usage=dict(run.token_usage),
     )
     return report
 
@@ -25,6 +26,10 @@ def format_final_report(report: FinalReport) -> str:
         f"Steps: {report.steps_used}",
         f"Duration: {report.duration_ms:.0f}ms",
     ]
+    if report.token_usage.get("total_tokens", 0) > 0:
+        lines.append(f"Tokens: {report.token_usage['total_tokens']:,}")
+        lines.append(f"  Prompt: {report.token_usage['prompt_tokens']:,}")
+        lines.append(f"  Completion: {report.token_usage['completion_tokens']:,}")
     if report.tool_summary:
         tools_str = ", ".join(f"{k} ({v})" for k, v in report.tool_summary.items())
         lines.append(f"Tools used: {tools_str}")

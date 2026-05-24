@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import time
 from collections import Counter
+from typing import Any
 
 from src.shared.types import RunTask
 from src.layers.eventbus_09 import EventBusLayerApi, event_types
@@ -39,6 +40,16 @@ def _collect_modified_files(eventbus: EventBusLayerApi) -> list[str]:
     return modified
 
 
+def _collect_token_usage(eventbus: EventBusLayerApi) -> dict[str, int]:
+    """Sum token usage from LLM_USAGE events."""
+    events = eventbus.get_history(event_types.LLM_USAGE)
+    return {
+        "prompt_tokens": sum(e.payload.get("prompt_tokens", 0) for e in events),
+        "completion_tokens": sum(e.payload.get("completion_tokens", 0) for e in events),
+        "total_tokens": sum(e.payload.get("total_tokens", 0) for e in events),
+    }
+
+
 def run_lifecycle(
     task: RunTask,
     eventbus: EventBusLayerApi,
@@ -46,8 +57,13 @@ def run_lifecycle(
     skills: SkillsLayerApi,
     memory: MemoryLayerApi,
     runner: RunnerLayerApi,
+    conversation_history: list[dict[str, Any]] | None = None,
 ) -> str:
-    """Run the full lifecycle: Context → Skills → Memory → Runner."""
+    """Run the full lifecycle: Context → Skills → Memory → Runner.
+
+    If conversation_history is provided, the runner passes it to the model
+    so prior turns are visible (multi-turn conversation).
+    """
     run = create_run(task.user_message)
     start = time.time()
 
@@ -67,8 +83,14 @@ def run_lifecycle(
     # Build full prompt with context, skills, and memory
     full_prompt = f"{enhanced_prompt}\n\n{memory_block}" if memory_block else enhanced_prompt
 
+    # Enable conversation mode if history is provided
+    runner_cfg = RunnerConfig(max_steps=15)
+    if conversation_history:
+        runner_cfg.conversation_mode = True
+
     # Run agent with real Runner
-    answer = runner.run(task, RunnerConfig(max_steps=15), system_prompt=full_prompt)
+    answer = runner.run(task, runner_cfg, system_prompt=full_prompt,
+                        conversation_history=conversation_history)
 
     # Collect run metrics from event history
     step_events = eventbus.get_history(event_types.AGENT_STEP_FINISHED)
@@ -80,12 +102,14 @@ def run_lifecycle(
     run.duration_ms = (time.time() - start) * 1000
     run.tool_summary = _collect_tool_summary(eventbus)
     run.modified_files = _collect_modified_files(eventbus)
+    run.token_usage = _collect_token_usage(eventbus)
 
     eventbus.publish(event_types.RUN_FINISHED, {
         "run_id": run.run_id,
         "steps": steps_used,
         "tool_summary": run.tool_summary,
         "duration_ms": run.duration_ms,
+        "token_usage": run.token_usage,
     })
 
     report = build_final_report(run)

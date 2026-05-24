@@ -16,6 +16,7 @@ class RunInfo:
     final_answer: str = ""
     tool_summary: dict[str, int] = field(default_factory=dict)
     modified_files: list[str] = field(default_factory=list)
+    token_usage: dict[str, int] = field(default_factory=dict)
 
 
 @dataclass
@@ -30,3 +31,4 @@ class FinalReport:
     modified_files: list[str]
     risks: list[str]
     rollback_guide: str
+    token_usage: dict[str, int] = field(default_factory=dict)

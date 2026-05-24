@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "catnip-agent"
-version = "2.0"
+version = "3.0"
 description = "Python Coding Agent Runtime — 11-layer architecture"
 requires-python = ">=3.12"
 dependencies = [

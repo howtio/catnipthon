@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import threading
 import time
 from collections import deque
 from src.shared.types import RunTask, TaskStatus
@@ -12,18 +13,38 @@ class InMemoryQueue:
     def __init__(self, store: TaskStatusStore) -> None:
         self._queue: deque[RunTask] = deque()
         self._store = store
+        self._notifier = threading.Event()
 
     def enqueue(self, task: RunTask) -> None:
         self._queue.append(task)
         self._store.set(task)
+        self._notifier.set()
 
     def dequeue(self) -> RunTask | None:
         if not self._queue:
             return None
         task = self._queue.popleft()
+        if self._queue:
+            self._notifier.set()
+        else:
+            self._notifier.clear()
         task.status = "running"
         task.started_at = time.time()
         return task
+
+    def wait_for_task(self, timeout: float | None = None) -> RunTask | None:
+        """Block until a task is available, then dequeue it.
+
+        Returns None if *timeout* expires before a task arrives.
+        """
+        while True:
+            task = self.dequeue()
+            if task is not None:
+                return task
+            self._notifier.wait(timeout)
+            self._notifier.clear()
+            if self.is_empty and timeout is not None:
+                return None
 
     def peek(self) -> RunTask | None:
         if not self._queue:

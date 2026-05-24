@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import json
+import os
 import uuid
+from typing import Any
 
 from src.shared.types import RunTask
 from src.layers.eventbus_09 import EventBusLayerApi, event_types
@@ -17,12 +19,19 @@ def run_agent(
     registry: ToolRegistryLayerApi,
     system_prompt: str = "",
     config: RunnerConfig | None = None,
+    conversation_history: list[dict[str, Any]] | None = None,
 ) -> str:
-    """Run the agent loop. Uses deepseek provider if configured, else heuristic."""
+    """Run the agent loop. Uses deepseek provider if configured, else heuristic.
+
+    Args:
+        conversation_history: accumulated messages from prior turns so the
+            model sees the full conversation context.
+    """
     cfg = config or RunnerConfig()
 
-    if cfg.provider == "deepseek":
-        return run_deepseek(task, eventbus, registry, system_prompt, cfg)
+    if cfg.provider == "deepseek" and os.environ.get("DEEPSEEK_API_KEY"):
+        return run_deepseek(task, eventbus, registry, system_prompt, cfg,
+                            conversation_history=conversation_history)
 
     # Heuristic provider (default)
     plan = heuristic_plan(task)

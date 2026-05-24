@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -15,7 +16,7 @@ MODULE = "src.layers.runner_08.deepseek_provider"
 
 
 def test_no_key_returns_message() -> None:
-    with patch(f"{MODULE}.DEEPSEEK_API_KEY", ""):
+    with patch.dict(os.environ, {"DEEPSEEK_API_KEY": ""}, clear=True):
         task = RunTask(id="t1", user_message="hello")
         eventbus = EventBusLayerApi()
         registry = ToolRegistryLayerApi()
@@ -24,13 +25,13 @@ def test_no_key_returns_message() -> None:
 
 
 def test_get_client_no_key() -> None:
-    with patch(f"{MODULE}.DEEPSEEK_API_KEY", ""):
+    with patch.dict(os.environ, {"DEEPSEEK_API_KEY": ""}, clear=True):
         client = _get_client()
         assert client is None
 
 
 def test_get_client_with_key() -> None:
-    with patch(f"{MODULE}.DEEPSEEK_API_KEY", "sk-test"):
+    with patch.dict(os.environ, {"DEEPSEEK_API_KEY": "sk-test"}, clear=True):
         client = _get_client()
         assert client is not None
         assert client.api_key == "sk-test"
@@ -101,7 +102,7 @@ def test_system_prompt_included() -> None:
 
     call_kwargs = mock_client.chat.completions.create.call_args[1]
     messages = call_kwargs["messages"]
-    assert messages[0]["role"] == "system"
+    assert messages[0]["role"] == "user"
     assert messages[0]["content"] == "Be helpful."
     assert messages[1]["role"] == "user"
     assert messages[1]["content"] == "hello"

@@ -20,32 +20,21 @@
 
 ## 02 Queue
 
-**状态**: Phase 1 — 已实现（内存 FIFO 队列 + 状态管理）
+**状态**: v3.0 — 已实现（内存 FIFO 队列 + 阻塞等待 + 心跳 + 追加要求）
 
 **已实现:**
-- in_memory_queue: deque 实现 FIFO
-- task_status_store: dict 映射 task_id → RunTask
+- in_memory_queue: deque 实现 FIFO + threading.Event 阻塞等待（wait_for_task）
+- task_status_store: dict 映射 task_id → RunTask（含 append_requirement / update_heartbeat / get_stale_tasks / get_running）
 - enqueue_task/dequeue_task: 入队/出队
-- wrapper: QueueLayerApi 公开接口（enqueue/dequeue/get_task/update_status）
-
-**待实现:**
-- 队列订阅通知
-- 任务快照和完成等待
+- wrapper: QueueLayerApi 公开接口（enqueue/dequeue/wait_for_task/append_requirement/update_heartbeat/get_stale_tasks/get_running_tasks）
 
 ## 03 Worker
 
-**状态**: Phase 1 — 已实现（同步消费循环 + 可注入处理函数）
+**状态**: v3.0 — 已实现（阻塞等待 + 错误处理 + 后台心跳）
 
 **已实现:**
-- run_worker_loop: 同步消费循环（poll → dequeue → process）
-- process_run_task: 单任务处理（注入 callable 或 echo 占位）
-- mark_task_status: done/failed 标记
-- handle_worker_error: 错误捕获
-- wrapper: WorkerLayerApi 公开接口
-
-**待实现:**
-- 线程池/并发消费槽
-- Worker 心跳生成
+- run_worker_loop: 同步消费循环（wait_for_task 阻塞等待 + try/except 错误处理）
+- wrapper: WorkerLayerApi 公开接口（含 run_with_heartbeat 后台心跳守护线程）
 
 ## 04 Harness
 
@@ -103,17 +92,13 @@
 
 ## 08 Runner
 
-**状态**: Phase 6 — 已实现（heuristic + DeepSeek 双 provider）
+**状态**: v3.0 — 已实现（DeepSeek reasoner + 推理路径捕获 + 追加要求注入）
 
 **已实现:**
 - provider: heuristic_plan（关键词规则路由）
-- deepseek_provider: 基于 OpenAI SDK 的 DeepSeek API 调用（多轮 tool calling）
+- deepseek_provider: 基于 OpenAI SDK 的 DeepSeek API 调用（deepseek-reasoner + reasoning_content 捕获 + 追加要求注入）
 - agent_runner: agent loop（计划 → 工具请求 → 等待结果 → 步骤完成 → 最终回答）
-- wrapper: RunnerLayerApi 公开接口（run + config + system_prompt）
-
-**待实现:**
-- planner 增强
-- 多模型切换
+- wrapper: RunnerLayerApi 公开接口（run + config + system_prompt + conversation_history）
 
 ## 09 EventBus
 
@@ -121,7 +106,7 @@
 
 **已实现:**
 - event_bus: 内存事件总线（publish/subscribe/unsubscribe）
-- event_types: 11 个事件类型常量
+- event_types: 17 个事件类型常量（含 QUEUE_HEARTBEAT、AGENT_REASONING_CHUNK、AGENT_ASKING_USER、AGENT_USER_RESPONSE）
 - publish_event / subscribe_event 便捷封装
 - waitForToolResult: threading.Event 实现工具结果等待
 - wrapper: EventBusLayerApi 公开接口（含 waitForToolResult）
@@ -167,5 +152,5 @@
 - logger: get_logger（控制台日志）
 - utils: create_id
 - version: 版本号从 pyproject.toml 单一真相源读取
-- cli: catnip 品牌 CLI 开机动画（TITLE/SUBTITLE/LAYERS 可覆盖）
+- cli: catnip 品牌 CLI 开机动画（TITLE/SUBTITLE/LAYERS 可覆盖）+ LAYER_COLORS 每层固定色 + 粉红开机动画（_pink）
 - jsonl_logger: EventBus 全事件旁路写入 logs/catnip.jsonl

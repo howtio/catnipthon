@@ -14,6 +14,14 @@ class WorkingSet:
 
 
 @dataclass
+class ConversationTurn:
+    """A single turn in a conversation: user message + assistant reply."""
+    user_message: str = ""
+    assistant_reply: str = ""
+    timestamp: float = 0.0
+
+
+@dataclass
 class MemorySnapshot:
     """Full memory snapshot for a session."""
 
@@ -23,3 +31,4 @@ class MemorySnapshot:
     project_recent_entries: list[str] = field(default_factory=list)
     carryover_tasks: list[str] = field(default_factory=list)
     startup_checklist: list[str] = field(default_factory=list)
+    conversation_history: list[dict[str, str]] = field(default_factory=list)

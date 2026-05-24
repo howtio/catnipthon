@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 from src.shared.types import RunTask
 from src.layers.eventbus_09 import EventBusLayerApi
 from src.layers.tool_registry_10 import ToolRegistryLayerApi
@@ -23,6 +25,12 @@ class RunnerLayerApi:
         task: RunTask,
         config: RunnerConfig | None = None,
         system_prompt: str = "",
+        conversation_history: list[dict[str, Any]] | None = None,
     ) -> str:
-        """Execute the agent loop and return the final answer."""
-        return run_agent(task, self._eventbus, self._registry, system_prompt, config)
+        """Execute the agent loop and return the final answer.
+
+        Args:
+            conversation_history: accumulated messages from prior turns.
+        """
+        return run_agent(task, self._eventbus, self._registry, system_prompt, config,
+                         conversation_history=conversation_history)

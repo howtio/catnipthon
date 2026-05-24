@@ -60,6 +60,35 @@
 
 ## 最近记录
 
+### 2026-05-24 / v3.0 — 队列层重构 + 推理路径显示 + CLI 视觉升级
+
+- **版本**: `3.0`
+- **改动部分**:
+  - **Phase 1 — 队列层重构**:
+    - `types.py` — RunTask 新增 `appended_requirements`、`last_heartbeat_at` 字段
+    - `in_memory_queue.py` — 新增 `threading.Event` 驱动 `wait_for_task()` 阻塞等待
+    - `task_status_store.py` — 新增 `append_requirement`、`update_heartbeat`、`get_stale_tasks`、`get_running`
+    - `wrapper.py` — QueueLayerApi 暴露 `wait_for_task`、`append_requirement`、`update_heartbeat`、`get_stale_tasks`、`get_running_tasks`
+    - `event_types.py` — 新增 `QUEUE_HEARTBEAT`
+    - `run_worker_loop.py` — 重写为阻塞等待 + try/except 错误处理
+    - `wrapper.py` (worker) — 新增 `run_with_heartbeat` 后台心跳线程
+    - 删除死代码：`process_run_task.py`、`handle_worker_error.py`
+    - `deepseek_provider.py` — 主循环中消费 `task.appended_requirements`
+  - **Phase 2 — 推理路径 + 层颜色**:
+    - `deepseek_provider.py` — 切换模型 `deepseek-reasoner`，捕获 `reasoning_content` 发布为 `AGENT_REASONING_CHUNK`
+    - `event_types.py` — 新增 `AGENT_REASONING_CHUNK`
+    - `cli.py` — 新增 `LAYER_COLORS` 字典、`layer_color()`、`c_layer()` 辅助函数
+    - `interactive.py` — ProgressTracker 订阅 `AGENT_REASONING_CHUNK`，实时显示推理文本（青色 96）
+  - **Phase 3 — 视觉大修**:
+    - `cli.py` — 新增粉红支持（`PINK=213`、`_is_256color()`、`_pink()`）
+    - `print_header()` — 全粉红开机动画
+    - `_layer_lines()` — 各层名以 `LAYER_COLORS` 固定颜色着色
+    - `print_step_header()` — 使用 runner 层颜色（33）
+    - `print_session_summary()` — 使用 harness 层颜色（92）
+- **验证**: mypy 90 文件 0 问题，pytest 60/60 通过
+- **提交**: （当前）
+- **下一步**: 等待用户反馈
+
 ### 2026-05-24 / CLI 2.0 — 交互式 REPL + 实时进度 + DeepSeek 真实环境测试
 
 - **版本**: `2.0`
