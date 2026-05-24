@@ -3,10 +3,10 @@ from __future__ import annotations
 from src.layers.context_05 import ContextLayerApi
 
 
-def test_context_returns_documents() -> None:
+def test_context_has_action_rules() -> None:
     ctx = ContextLayerApi().get_context()
-    assert len(ctx.documents) > 0
-    assert "DEV_PROGRESS.md" in ctx.documents
+    assert "Call the right tool immediately" in ctx.system_prompt
+    assert "One tool call per turn" in ctx.system_prompt
 
 
 def test_context_has_system_prompt() -> None:
