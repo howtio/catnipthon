@@ -122,8 +122,8 @@ class ProgressTracker:
         args = event.payload.get("arguments", {})
         args_str = ""
         if args:
-            # Show first meaningful arg (file_path or path)
-            for key in ("file_path", "path", "command"):
+            # Show first meaningful arg (file_path, url, path, command)
+            for key in ("file_path", "url", "path", "command"):
                 val = args.get(key, "")
                 if val:
                     args_str = f"{key}: {str(val)[:60]}"

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import re
 import subprocess
 import webbrowser
@@ -225,20 +226,35 @@ def open_browser(url: str) -> str:
         if p.exists():
             url = p.resolve().as_uri()
         else:
-            # Try relative to workspace
             wp = WORKSPACE_ROOT / url
             if wp.exists():
                 url = wp.resolve().as_uri()
             else:
                 return f"Error: file not found: {url} (use http/https or a valid local path)"
+
+    def _do_open(target: str) -> bool | None:
+        """Try webbrowser.open, fall back to start on Windows."""
+        try:
+            result = webbrowser.open(target)
+            return result
+        except Exception:
+            if os.name == "nt":
+                try:
+                    subprocess.run(["start", target], shell=True, timeout=10)
+                    return True
+                except Exception:
+                    pass
+            return False
+
     import concurrent.futures
     with concurrent.futures.ThreadPoolExecutor(max_workers=1) as exe:
-        fut = exe.submit(webbrowser.open, url)
+        fut = exe.submit(_do_open, url)
         try:
             result = fut.result(timeout=5.0)
-            if result:
+            # On Windows, os.startfile() returns None (falsy but not failure)
+            if result is not False:
                 return f"Opened browser: {url}"
-            return "Error: webbrowser.open returned False (no browser found)"
+            return f"(browser open attempted — if nothing appeared, open {url} manually)"
         except concurrent.futures.TimeoutError:
             return f"Opened browser (detached): {url}"
         except Exception as e:
