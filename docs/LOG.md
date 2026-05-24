@@ -57,6 +57,23 @@
 ---
 
 ## 最近记录
+
+### 2026-05-24 / Phase 2 — Harness + Context + Skills + Memory + EventBus
+
+- **版本**: `0.2`
+- **改动部分**:
+  - `09-eventbus` — 完整实现：EventBus pub/sub、事件类型常量、历史记录、订阅/取消订阅
+  - `05-context` — 完整实现：文档加载、Workspace 扫描、System Prompt 构建、开工清单提取
+  - `06-skills` — 完整实现：技能注册表、关键词匹配、SKILL.md 加载、注入
+  - `07-memory` — 完整实现：MemorySnapshot、WorkingSet、JSON 持久化、session 记忆维护
+  - `04-harness` — 完整实现：Run 生命周期、Context→Skills→Memory→Runner 串联、Final Report
+  - `08-runner` — 占位符（Phase 3 实现真实 ReAct loop）
+  - `bootstrap.py` — Wire 全部 8 层
+  - 新增测试 20 个（eventbus 5、context 4、skills 5、memory 4、harness 2）
+- **验证**: mypy 65 文件 0 问题，pytest 24/24 通过，冒烟测试通过（Context 8 docs + Skills: testing + Memory: 187 chars）
+- **提交**: TBD
+- **下一步**: Phase 3 — Runner + EventBus 完善（tool.call.requested/result 路由）
+
 ### 2026-05-24 / Phase 1 — Gateway + Queue + Worker 最小链路打通
 
 - **版本**: `0.1`
