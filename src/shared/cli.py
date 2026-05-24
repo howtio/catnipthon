@@ -148,7 +148,7 @@ def print_step_claude(step_num: int, tool_name: str, args_summary: str = "") -> 
       ◇ Tool: read_file
         ┃ path: src/main.py
     """
-    print(f"\n  {SYM_SUB} {_c('Tool:', DIM)} {_c(tool_name, HIGHLIGHT)}")
+    print(f"  {SYM_SUB} {_c('Tool:', DIM)} {_c(tool_name, HIGHLIGHT)}")
     if args_summary:
         print(f"  {SYM_BRANCH} {_c(args_summary, DIM)}")
 
@@ -164,7 +164,7 @@ def print_result_claude(success: bool, duration_s: float, tokens: int = 0) -> No
         status = _c(f"{SYM_OK} ({duration_s:.1f}s{token_str})", OK)
     else:
         status = _c(f"{SYM_FAIL} ({duration_s:.1f}s{token_str})", ERROR)
-    print(f"\r  {SYM_SUB} {status}")
+    print(f"\033[2K\r  {SYM_SUB} {status}")
 
 
 def print_summary_claude(
@@ -199,15 +199,21 @@ def print_thinking(text: str, elapsed_s: float = 0, heartbeat: bool = False) -> 
 
     Regular reasoning:  > thinking text here...
     Heartbeat ping:     > thinking... (5.2s)
+    Uses end="" + flush=True so chunks stream inline without newlines.
     """
     if heartbeat:
-        print(f"\r  {_c(f'> thinking... ({elapsed_s:.0f}s)', DIM)}", end="")
+        print(f"\033[2K\r  {_c(f'> thinking... ({elapsed_s:.0f}s)', DIM)}", end="", flush=True)
         return
     if not text:
         return
     time_str = f" ({elapsed_s:.1f}s)" if elapsed_s else ""
     line = text[:80].replace("\n", " ")
-    print(f"\r  {_c(f'> {line}{time_str}', DIM)}")
+    print(f"\033[2K\r  {_c(f'> {line}{time_str}', DIM)}", end="", flush=True)
+
+
+def print_thinking_done() -> None:
+    """Finalize the thinking line (move to next line)."""
+    print()
 
 
 def print_user_message(msg: str) -> None:

@@ -15,7 +15,7 @@ from src.shared.cli import (
     W, H_LINE, SYM_SUB, SYM_OK,
     _c, DIM, OK, ERROR, HIGHLIGHT,
     print_divider, print_step_claude, print_result_claude,
-    print_summary_claude, print_thinking, print_user_message,
+    print_summary_claude, print_thinking, print_thinking_done, print_user_message,
 )
 from src.layers.eventbus_09 import EventBusLayerApi, event_types
 from src.layers.eventbus_09.types import Event
@@ -115,6 +115,7 @@ class ProgressTracker:
         self._run_id = event.payload.get("run_id", "")
 
     def _on_tool_call(self, event: Event) -> None:
+        print_thinking_done()  # finalize any streaming thinking line
         self._step_count += 1
         self._current_tool = event.payload.get("tool_name", "")
         self._step_start = time.time()
@@ -155,9 +156,13 @@ class ProgressTracker:
         elapsed = event.payload.get("elapsed_s", 0)
         heartbeat = event.payload.get("heartbeat", False)
         with _print_lock:
+            if not getattr(self, '_thinking_started', False):
+                self._thinking_started = True
+                print()  # push the "> " prompt up so thinking stays on its own line
             print_thinking(chunk, elapsed_s=elapsed, heartbeat=heartbeat)
 
     def _on_answer(self, event: Event) -> None:
+        print_thinking_done()  # finalize any trailing thinking line
         total_duration = (time.time() - self._start_time) * 1000
         with _print_lock:
             print_summary_claude(
