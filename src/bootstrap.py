@@ -1,4 +1,4 @@
-"""Phase 2 wiring: all 8 layers (Gateway → Queue → Worker → Harness → Context → Skills → Memory → EventBus)."""
+"""Phase 3 wiring: all 11 layers are created in dependency order."""
 
 from __future__ import annotations
 
@@ -13,6 +13,9 @@ from src.layers.eventbus_09 import EventBusLayerApi
 from src.layers.context_05 import ContextLayerApi
 from src.layers.skills_06 import SkillsLayerApi
 from src.layers.memory_07 import MemoryLayerApi
+from src.layers.runner_08 import RunnerLayerApi
+from src.layers.tool_registry_10 import ToolRegistryLayerApi
+from src.layers.executor_11 import ExecutorLayerApi
 from src.layers.harness_04 import HarnessLayerApi
 
 
@@ -25,22 +28,35 @@ class App:
     context: ContextLayerApi
     skills: SkillsLayerApi
     memory: MemoryLayerApi
+    runner: RunnerLayerApi
+    tool_registry: ToolRegistryLayerApi
+    executor: ExecutorLayerApi
     harness: HarnessLayerApi
 
 
 def bootstrap() -> App:
-    """Create and wire all layer instances (Phase 2)."""
+    """Create and wire all layer instances (Phase 3)."""
+    # No-dependency layers (instantiation order doesn't matter within this group)
     queue = QueueLayerApi()
     eventbus = EventBusLayerApi()
     context = ContextLayerApi()
     skills = SkillsLayerApi()
     memory = MemoryLayerApi()
-    harness = HarnessLayerApi(eventbus, context, skills, memory)
-    worker = WorkerLayerApi(queue)
+    registry = ToolRegistryLayerApi()
 
+    # EventBus + ToolRegistry needed by Executor and Runner
+    executor = ExecutorLayerApi(eventbus, registry)
+    runner = RunnerLayerApi(eventbus, registry)
+
+    # Harness orchestrates the flow
+    harness = HarnessLayerApi(eventbus, context, skills, memory, runner)
+
+    # Worker uses Harness for processing
+    worker = WorkerLayerApi(queue)
     harness_fn: Callable[[RunTask], str] = harness.run
     worker.set_process_fn(harness_fn)
 
+    # Gateway bridges CLI to Queue → Worker
     gateway = GatewayLayerApi(queue, worker, GatewayConfig(worker_max_tasks=1))
 
     return App(
@@ -51,5 +67,8 @@ def bootstrap() -> App:
         context=context,
         skills=skills,
         memory=memory,
+        runner=runner,
+        tool_registry=registry,
+        executor=executor,
         harness=harness,
     )

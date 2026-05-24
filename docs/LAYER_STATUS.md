@@ -102,21 +102,59 @@
 
 ## 08 Runner
 
-**状态**: Phase 2 占位符（Phase 3 实现真实 ReAct loop）
+**状态**: Phase 3 — 已实现（heuristic provider + agent loop + tool request/result）
+
+**已实现:**
+- provider: heuristic_plan（关键词规则路由）
+- agent_runner: agent loop（计划 → 工具请求 → 等待结果 → 步骤完成 → 最终回答）
+- wrapper: RunnerLayerApi 公开接口（run + config）
+
+**待实现:**
+- DeepSeek provider（Phase 6）
+- build_ai_tools / run_openai_chat
+- planner 增强
 
 ## 09 EventBus
 
-**状态**: Phase 2 — 已实现（内存 pub/sub 事件系统）
+**状态**: Phase 3 — 已实现（内存 pub/sub + waitForToolResult）
 
 **已实现:**
 - event_bus: 内存事件总线（publish/subscribe/unsubscribe）
-- event_types: 11 个事件类型常量（run.* / agent.* / tool.call.* / worker.* / prompt.*）
+- event_types: 11 个事件类型常量
 - publish_event / subscribe_event 便捷封装
-- wrapper: EventBusLayerApi 公开接口
+- waitForToolResult: threading.Event 实现工具结果等待
+- wrapper: EventBusLayerApi 公开接口（含 waitForToolResult）
 
 **待实现:**
-- waitForToolResult
-- tool_call_router
+- tool_call_router（Phase 4+）
+
+## 10 Tool Registry
+
+**状态**: Phase 3 — 已实现（6 MVP 工具定义 + OpenAPI schema 输出）
+
+**已实现:**
+- 6 个工具定义：list_files / read_file / write_file / patch_file / shell_exec / git_diff
+- 分类：fs / shell / vcs
+- 权限等级：low / medium / high
+- ToolRegistry: 注册、查询、分类筛选、OpenAI schema 输出
+- wrapper: ToolRegistryLayerApi 公开接口
+
+**待实现:**
+- validate_tool_schema
+- browser/web 工具（1.x 扩展）
+
+## 11 Executor
+
+**状态**: Phase 3 — 骨架实现（订阅工具事件 + 模拟执行 + 发布结果）
+
+**已实现:**
+- execute_tool: 模拟执行入口（Phase 3 mock）
+- wrapper: ExecutorLayerApi（自动订阅 tool.call.requested + execute_sync）
+- ToolCallRequest / ToolResult 类型
+
+**待实现:**
+- 三层 Guard（permissionGuard / pathGuard / commandGuard）— Phase 4
+- 真实工具实现 — Phase 5
 
 ## 10 Tool Registry
 

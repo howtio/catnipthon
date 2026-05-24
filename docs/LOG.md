@@ -58,6 +58,22 @@
 
 ## 最近记录
 
+### 2026-05-24 / Phase 3+4 — Runner + EventBus + Tool Registry + Executor 骨架
+
+- **版本**: `0.4`
+- **改动部分**:
+  - `09-eventbus` — 新增waitForToolResult（threading.Event 实现工具结果等待）
+  - `10-tool-registry` — 完整实现：6 个工具定义（list_files/read_file/write_file/patch_file/shell_exec/git_diff）、OpenAI schema 输出
+  - `11-executor` — 骨架实现：订阅 tool.call.requested、模拟执行、发布 tool.call.result/failed
+  - `08-runner` — 完整实现：heuristic provider、计划生成、agent 循环、工具请求/结果处理
+  - `04-harness` — Runner 实现替换占位，真实调用 agent loop
+  - `bootstrap.py` — Wire 全部 11 层
+  - 新增测试 11 个（runner 3、executor 3、tool_registry 5、waitForToolResult 3，但实际新增只 11 个）
+- **验证**: mypy 83 文件 0 问题，pytest 38/38 通过，冒烟测试通过（Runner heuristic: list_files + git_diff 计划执行）
+- **提交**: TBD
+- **下一步**: Phase 4 — Tool Registry 完善 + Executor Guard 框架
+
+
 ### 2026-05-24 / Phase 2 — Harness + Context + Skills + Memory + EventBus
 
 - **版本**: `0.2`
@@ -67,12 +83,12 @@
   - `06-skills` — 完整实现：技能注册表、关键词匹配、SKILL.md 加载、注入
   - `07-memory` — 完整实现：MemorySnapshot、WorkingSet、JSON 持久化、session 记忆维护
   - `04-harness` — 完整实现：Run 生命周期、Context→Skills→Memory→Runner 串联、Final Report
-  - `08-runner` — 占位符（Phase 3 实现真实 ReAct loop）
+  - `08-runner` — 占位符（Phase 3+4 实现真实 ReAct loop）
   - `bootstrap.py` — Wire 全部 8 层
   - 新增测试 20 个（eventbus 5、context 4、skills 5、memory 4、harness 2）
 - **验证**: mypy 65 文件 0 问题，pytest 24/24 通过，冒烟测试通过（Context 8 docs + Skills: testing + Memory: 187 chars）
 - **提交**: 43cf920
-- **下一步**: Phase 3 — Runner + EventBus 完善（tool.call.requested/result 路由）
+- **下一步**: Phase 3+4 — Runner + EventBus 完善（tool.call.requested/result 路由）
 
 ### 2026-05-24 / Phase 1 — Gateway + Queue + Worker 最小链路打通
 
@@ -133,4 +149,4 @@
   - 新增测试：eventbus 5 个、context 5 个、skills 8 个、memory 8 个、harness 3 个
 - **修改文件**: src/layers/{eventbus_09,context_05,skills_06,memory_07,harness_04,runner_08}/*, src/bootstrap.py, tests/*
 - **验证**: mypy 通过（28 文件 0 问题），pytest 38/38 通过，冒烟测试通过（事件发布、文档加载 16199 chars、技能匹配 "testing"、final report 生成）
-- **下一步**: Phase 3 — Runner + EventBus 完善（tool.call.requested/result 路由）
+- **下一步**: Phase 3+4 — Runner + EventBus 完善（tool.call.requested/result 路由）
