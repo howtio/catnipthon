@@ -7,7 +7,7 @@
 
 ## 当前版本
 
-`5.0`（防卡死 + Web 搜索增强 + 全流程优化）
+`7.0`（搜索增强 + CLI 交互大修）
 
 ---
 
@@ -15,7 +15,7 @@
 
 | 项目 | 状态 |
 |------|------|
-| 版本 | `5.0` |
+| 版本 | `7.0` |
 | 脚手架 1.0（基础文档 + 目录） | 已完成 |
 | 脚手架 2.0（Python 工程化 + 导入策略） | 已完成 |
 | 脚手架 3.0（马拉松接力 + 防漂移 + CLI开机动画） | 已完成 |
@@ -36,6 +36,9 @@
 | v5.0 防卡死（流式超时 60s） | **已实现** ✅ |
 | v5.0 Web 搜索增强（duckduckgo_search + BeautifulSoup） | **已实现** ✅ |
 | v5.0 open_browser 结果引导 + max_steps 提升 | **已实现** ✅ |
+| v7.0 搜索增强（ddgs 迁移 + HTTP 后备） | **已实现** ✅ |
+| v7.0 CLI 交互大修（思考过滤 + 流式答案 + 警告抑制） | **已实现** ✅ |
+| v7.0 System Prompt 优化（shell_exec 约束） | **已实现** ✅ |
 | typecheck | 通过（95 文件，0 错误） |
 | 测试 | 70 个，全部通过 |
 
@@ -82,3 +85,13 @@
   - open_browser 引导 agent 继续：消息追加 "Continue with the next step."
   - max_steps 10→20（默认），15→20（run_lifecycle）
   - httpx / beautifulsoup4 / duckduckgo-search 正式加入 pyproject.toml
+- v7.0 搜索增强（2026-05-24）：
+  - `duckduckgo_search` → `ddgs` 迁移，消除 RuntimeWarning
+  - 新增 `_search_ddg_html()` HTTP 后备搜索（httpx + BeautifulSoup 直抓 DDG）
+  - 双后备策略：ddgs 库为主，HTTP 直搜为后备
+- v7.0 CLI 交互大修（2026-05-24）：
+  - `print_thinking()` 过滤无意义碎片，只显示真实推理
+  - 新增 `print_streaming_answer()` 最终答案流式显示
+  - 新增 `AGENT_ANSWER_CHUNK` 事件类型
+  - `warnings.filterwarnings("ignore")` 抑制包警告
+  - System Prompt 约束 shell_exec 使用范围

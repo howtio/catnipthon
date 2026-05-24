@@ -217,9 +217,18 @@ def run_deepseek(
         except Exception as e:
             return f"[deepseek] API error: {type(e).__name__}: {e}"
 
-        # No tool calls = final answer
+        # No tool calls = final answer — stream it chunk by chunk for live display
         if not tools or not tool_calls_list:
             answer = content or "(no response)"
+            # Publish answer in segments for streaming display
+            if answer and answer != "(no response)":
+                for i in range(0, len(answer), 60):
+                    seg = answer[i:i + 60]
+                    eventbus.publish(event_types.AGENT_ANSWER_CHUNK, {
+                        "chunk": seg,
+                        "offset": i,
+                        "total": len(answer),
+                    })
             eventbus.publish(event_types.AGENT_ANSWER_PRODUCED, {"answer": answer})
             return answer
 

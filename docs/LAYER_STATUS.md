@@ -134,6 +134,7 @@
 
 **已实现:**
 - tools.py: 10 个真实工具（list_files / read_file / write_file / patch_file / shell_exec / git_diff / web_fetch / web_search / open_browser / file_search）
+- web_search: ddgs 库为主 + HTTP 直搜后备（v7.0）
 - guard.py: Guard 统一入口（自动识别工具类别运行对应 guard，含 _check_url SSRF 防护）
 - policy/url_guard: SSRF 防护（拦截 localhost/127.0.0.1/私有 IP）
 - policy/permission_guard.py: low/medium/high 三级权限检查
@@ -152,6 +153,6 @@
 - logger: get_logger（控制台日志）
 - utils: create_id
 - version: 版本号从 pyproject.toml 单一真相源读取
-- cli: Claude Code 风格 CLI（print_step_claude / print_result_claude / print_summary_claude / print_thinking）+ 粉红开机动画（_pink）
+- cli: Claude Code 风格 CLI（print_step_claude / print_result_claude / print_summary_claude / print_thinking / print_streaming_answer）+ 粉红开机动画（_pink）
 - interactive: ThreadPoolExecutor 后台 agent + 实时注入 + 线程安全 EventBus
 - jsonl_logger: EventBus 全事件旁路写入 logs/catnip.jsonl

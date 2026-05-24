@@ -4,14 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "catnip-agent"
-version = "5.0"
+version = "7.0"
 description = "Python Coding Agent Runtime — 11-layer architecture"
 requires-python = ">=3.12"
 dependencies = [
     "openai>=1.0",
     "httpx>=0.27",
     "beautifulsoup4>=4.12",
-    "duckduckgo-search>=7.0",
+    "ddgs>=9.0",
 ]
 
 [project.optional-dependencies]

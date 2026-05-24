@@ -1,12 +1,13 @@
 """Catnip CLI rendering — Claude Code-style clean output.
 
 Import `print_header`, `print_step_claude`, `print_result_claude`,
-`print_summary_claude`, `print_thinking` from here.
+`print_summary_claude`, `print_thinking`, `print_streaming_answer` from here.
 """
 
 from __future__ import annotations
 
 import os
+import re
 import sys
 
 from src.shared.version import VERSION_TAG
@@ -55,12 +56,6 @@ def _c(text: str, color_code: int) -> str:
     if not _HAS_COLOR:
         return text
     return f"\033[{color_code}m{text}{_RESET}"
-
-
-def _strip_ansi(text: str) -> str:
-    """Remove ANSI codes for width calculation."""
-    import re
-    return re.sub(r"\033\[[0-9;]*m", "", text)
 
 
 # ── Symbol constants (Claude Code style) ───────────────────────────────
@@ -194,46 +189,91 @@ def print_summary_claude(
         print(f"  {SYM_SUB} {_c('Tools:', DIM)} {tool_list}")
 
 
-# Track whether the current thinking line is the first chunk or a subsequent update
-# Used by print_thinking to decide between new line vs overwrite
+# ── Thinking display ────────────────────────────────────────────────────
+
+# Regex: matches content that has real words (not just punctuation)
+_HAS_TEXT = re.compile(r"[\u4e00-\u9fff\w]{2,}")  # 2+ CJK or word chars
+
 _thinking_active = False
 
 
+def _is_meaningful(text: str) -> bool:
+    """Check if a thinking chunk has actual content worth displaying."""
+    return bool(_HAS_TEXT.search(text))
+
+
 def print_thinking(text: str, elapsed_s: float = 0, heartbeat: bool = False) -> None:
-    """Print Claude Code-style thinking/reasoning text with elapsed time.
+    """Print Claude Code-style thinking/reasoning with elapsed time.
 
-    Regular reasoning:  > thinking text here... (5.2s)
-    Heartbeat ping:     > thinking... (5.2s)
+    Filters out single-punctuation / non-meaningful chunks automatically.
+    Only displays content that has real words (CJK or 2+ ASCII letters).
 
-    Uses \033[1A (cursor up) to overwrite the previous thinking line
-    instead of \r, avoiding corruption of the input prompt line.
+    Heartbeat:  > thinking... (5.2s)
+    Reasoning:  > I should search for weather data... (2.3s)
     """
     global _thinking_active
-    if not text and not heartbeat:
-        return
-    elapsed_str = f" ({elapsed_s:.1f}s)" if elapsed_s else ""
+
     if heartbeat:
-        line = f"> thinking...{elapsed_str}"
-    else:
-        txt = text[:80].replace("\n", " ")
-        line = f"> {txt}{elapsed_str}"
+        line = f"> thinking... ({elapsed_s:.1f}s)" if elapsed_s else "> thinking..."
+        if _thinking_active:
+            print(f"\033[1A\033[2K  {_c(line, DIM)}")
+        else:
+            print(f"  {_c(line, DIM)}")
+            _thinking_active = True
+        return
+
+    if not text or not _is_meaningful(text):
+        return  # silently skip garbage
+
+    elapsed_str = f" ({elapsed_s:.1f}s)" if elapsed_s else ""
+    txt = text[:80].replace("\n", " ")
+    line = f"> {txt}{elapsed_str}"
 
     if _thinking_active:
-        # Overwrite previous thinking line: go up 1 line, clear it, print
         print(f"\033[1A\033[2K  {_c(line, DIM)}")
     else:
-        # First thinking chunk: print on a fresh line, mark active
         print(f"  {_c(line, DIM)}")
         _thinking_active = True
 
 
 def print_thinking_done() -> None:
-    """Finalize the thinking line. No-op since print_thinking already adds newline."""
+    """Finalize the current thinking line."""
     global _thinking_active
     _thinking_active = False
 
 
+# ── Streaming answer display ────────────────────────────────────────────
+
+_answer_line = 0  # tracks which line of the answer we're on
+
+
+def print_streaming_answer(chunk: str, offset: int = 0, total: int = 0) -> None:
+    """Stream the final answer text in real-time (Claude Code style).
+
+    Shows as plain text with progressive accumulation.
+    """
+    global _answer_line
+
+    if not chunk:
+        return
+
+    # On first chunk, clean up any leftover thinking line
+    if offset == 0:
+        print_thinking_done()
+
+    # Print the chunk — if it fits on current line, extend; else new line
+    print(chunk, end="", flush=True)
+    _answer_line += chunk.count("\n")
+
+
+def print_streaming_done() -> None:
+    """Finalize streaming answer display."""
+    global _answer_line
+    _answer_line = 0
+    print()  # end the last line
+
+
 def print_user_message(msg: str) -> None:
-    """Print user message in Claude Code style with '>' prompt prefix."""
+    """Print user message in Claude Code style."""
     print(f"\n  > {msg}")
     print_divider()

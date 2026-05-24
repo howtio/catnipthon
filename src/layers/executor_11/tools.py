@@ -177,33 +177,91 @@ def web_fetch(url: str) -> str:
     return _fetch_url(url)
 
 
-def web_search(query: str, max_results: int = 5) -> str:
-    """Search the web via DuckDuckGo. Returns top result snippets."""
+def _search_ddgs(query: str, max_results: int) -> list[dict[str, str]] | None:
+    """Search via ddgs library (primary). Returns None on failure."""
     try:
-        from duckduckgo_search import DDGS
+        from ddgs import DDGS
     except ImportError:
-        return "Error: duckduckgo_search not available"
-
-    max_results = max(1, min(max_results, 10))
+        return None
     try:
         with DDGS() as ddgs:
             raw = list(ddgs.text(query, max_results=max_results))
-    except Exception as e:
-        return f"Error: search failed: {e}"
+        return raw if raw else None
+    except Exception:
+        return None
 
-    if not raw:
+
+def _search_ddg_html(query: str, max_results: int) -> list[dict[str, str]] | None:
+    """Search via DuckDuckGo HTML endpoint (fallback). Returns None on failure."""
+    try:
+        import httpx
+        from bs4 import BeautifulSoup
+    except ImportError:
+        return None
+    try:
+        url = "https://html.duckduckgo.com/html/"
+        with httpx.Client(timeout=10, follow_redirects=True) as client:
+            resp = client.post(url, data={"q": query},
+                               headers={"User-Agent": "Mozilla/5.0"})
+            resp.raise_for_status()
+        soup = BeautifulSoup(resp.text, "html.parser")
+        raw_results = soup.select(".result__body")
+        results: list[dict[str, str]] = []
+        for r in raw_results[:max_results]:
+            h = r.select_one(".result__title a")
+            s = r.select_one(".result__snippet")
+            title = h.get_text(strip=True) if h else ""
+            href_raw = h.get("href", "") if h else ""
+            # BeautifulSoup get() may return None or a list; coerce to str
+            href = str(href_raw) if href_raw is not None else ""
+            # DDG wraps links in redirect URLs — extract the real target
+            if href.startswith("//duckduckgo.com/l/?uddg="):
+                from urllib.parse import unquote, urlparse, parse_qs
+                parsed = urlparse(href)
+                qs = parse_qs(parsed.query)
+                real = qs.get("uddg", [None])[0]
+                if real:
+                    href = unquote(str(real))
+            body = s.get_text(strip=True) if s else ""
+            if title:
+                results.append({"title": title, "href": href, "body": body})
+        return results if results else None
+    except Exception:
+        return None
+
+
+def _format_search_results(results: list[dict[str, str]], query: str) -> str:
+    """Format search results into a clean string."""
+    if not results:
         return f"(no results for: {query})"
-
-    results: list[str] = []
-    for i, r in enumerate(raw):
+    lines: list[str] = []
+    for i, r in enumerate(results):
         title = r.get("title", "").strip()
         href = r.get("href", "").strip()
         body = r.get("body", "").strip()
-        results.append(f"{i+1}. {title}")
-        results.append(f"   {href}")
+        lines.append(f"{i+1}. {title}")
+        if href:
+            lines.append(f"   {href}")
         if body:
-            results.append(f"   {body}")
-    return "\n".join(results)
+            lines.append(f"   {body}")
+    return "\n".join(lines)
+
+
+def web_search(query: str, max_results: int = 5) -> str:
+    """Search the web. Uses ddgs library; falls back to HTTP scraping."""
+    max_results = max(1, min(max_results, 10))
+
+    # Primary: ddgs library
+    raw = _search_ddgs(query, max_results)
+    if raw is not None:
+        return _format_search_results(raw, query)
+
+    # Fallback: HTTP scrape of DuckDuckGo HTML search
+    raw = _search_ddg_html(query, max_results)
+    if raw is not None:
+        return _format_search_results(raw, query)
+
+    return f"Error: all search backends failed for: {query}"
 
 
 def open_browser(url: str) -> str:

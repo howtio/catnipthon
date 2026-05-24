@@ -6,6 +6,7 @@ import os
 import sys
 import threading
 import time
+import warnings
 from collections.abc import Callable
 from concurrent.futures import Future, ThreadPoolExecutor
 from typing import Any
@@ -15,11 +16,15 @@ from src.shared.cli import (
     W, H_LINE, SYM_SUB, SYM_OK,
     _c, DIM, OK, ERROR, HIGHLIGHT,
     print_divider, print_step_claude, print_result_claude,
-    print_summary_claude, print_thinking, print_thinking_done, print_user_message,
+    print_summary_claude, print_thinking, print_thinking_done,
+    print_streaming_answer, print_streaming_done, print_user_message,
 )
 from src.layers.eventbus_09 import EventBusLayerApi, event_types
 from src.layers.eventbus_09.types import Event
 from src.bootstrap import App
+
+# Suppress noisy Python warnings (e.g. package rename warnings)
+warnings.filterwarnings("ignore")
 
 
 HELP_TEXT = f"""
@@ -92,6 +97,9 @@ class ProgressTracker:
             self._eventbus.subscribe(event_types.AGENT_REASONING_CHUNK, self._on_reasoning_chunk)
         )
         self._unsubs.append(
+            self._eventbus.subscribe(event_types.AGENT_ANSWER_CHUNK, self._on_answer_chunk)
+        )
+        self._unsubs.append(
             self._eventbus.subscribe(event_types.AGENT_ANSWER_PRODUCED, self._on_answer)
         )
 
@@ -158,8 +166,17 @@ class ProgressTracker:
         with _print_lock:
             print_thinking(chunk, elapsed_s=elapsed, heartbeat=heartbeat)
 
+    def _on_answer_chunk(self, event: Event) -> None:
+        """Handle streaming answer text chunk."""
+        chunk = event.payload.get("chunk", "")
+        offset = event.payload.get("offset", 0)
+        total = event.payload.get("total", 0)
+        with _print_lock:
+            print_streaming_answer(chunk, offset=offset, total=total)
+
     def _on_answer(self, event: Event) -> None:
-        print_thinking_done()  # finalize any trailing thinking line
+        print_thinking_done()
+        print_streaming_done()
         total_duration = (time.time() - self._start_time) * 1000
         with _print_lock:
             print_summary_claude(

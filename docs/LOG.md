@@ -60,7 +60,36 @@
 
 ## 最近记录
 
-### 2026-05-24 / v5.0 — 防卡死 + Web 搜索增强 + 全流程优化
+### 2026-05-24 / v7.0 — 搜索增强 + CLI 交互大修
+
+- **版本**: `7.0`
+- **改动部分**:
+  - **web_search 全面翻新**:
+    - `duckduckgo_search` → `ddgs` 迁移（消除 RuntimeWarning）
+    - 新增 `_search_ddg_html()` HTTP 后备搜索（httpx + BeautifulSoup 直接抓取 DDG 结果页）
+    - 双后备策略：ddgs 库为主，HTTP 直搜为辅，任一成功即可
+    - pyproject.toml 依赖更新：`duckduckgo-search` → `ddgs`
+  - **CLI 思考显示重写**:
+    - `print_thinking()` 过滤无意义内容（跳过单标点/空白碎片），只显示真实推理文字
+    - 新增 `print_streaming_answer()` — 最终答案实时流式显示
+    - 新增 `AGENT_ANSWER_CHUNK` 事件类型，最终答案按 60 字符分段推送
+    - 新增 `_is_meaningful()` 智能判断（CJK 或 2+ 字母词才显示）
+    - `warnings.filterwarnings("ignore")` 抑制 Python 包警告
+  - **System Prompt 优化**:
+    - 优先 write_file/read_file 操作文件，shell_exec 仅用于安装/测试
+    - HTML 结果用 open_browser 展示，不用 shell
+  - **依赖更新**:
+    - `duckduckgo-search>=7.0` → `ddgs>=9.0`
+- **修改文件**:
+  - `pyproject.toml` — 版本 7.0 + ddgs 依赖
+  - `src/layers/executor_11/tools.py` — web_search 双后备重写
+  - `src/layers/eventbus_09/event_types.py` — 新增 AGENT_ANSWER_CHUNK
+  - `src/layers/runner_08/deepseek_provider.py` — 最终答案分段推送
+  - `src/shared/cli.py` — print_thinking 过滤 + print_streaming_answer
+  - `src/shared/interactive.py` — 流式答案展示 + 警告抑制
+  - `src/layers/context_05/build_base_system_prompt.py` — shell_exec 约束
+- **验证**: mypy 95 文件 0 错误，pytest 70/70 通过
+- **下一步**: 等待用户反馈
 
 - **版本**: `5.0`
 - **改动部分**:

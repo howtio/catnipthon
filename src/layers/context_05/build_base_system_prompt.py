@@ -13,6 +13,8 @@ def build_base_system_prompt(ctx: ContextResult) -> str:
     parts.append("- Call the right tool immediately. Do NOT explain what you are about to do.")
     parts.append("- One tool call per turn. No chitchat.")
     parts.append("- If a tool errors, try a different approach. Do NOT retry the same thing.")
+    parts.append("- Prefer write_file/read_file for file ops. Use shell_exec ONLY for installing deps or running tests.")
+    parts.append("- To show results, write an HTML file and open_browser. Do NOT use shell for file creation.")
     parts.append("- When done, give a one-line summary of what you did.")
     parts.append("")
 

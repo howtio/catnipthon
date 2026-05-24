@@ -11,6 +11,7 @@ AGENT_PLAN_GENERATED = "agent.plan.generated"
 AGENT_REASONING_SUMMARY = "agent.reasoning.summary"
 AGENT_REASONING_CHUNK = "agent.reasoning.chunk"
 AGENT_ANSWER_PRODUCED = "agent.answer.produced"
+AGENT_ANSWER_CHUNK = "agent.answer.chunk"  # streaming answer text during final turn
 
 # Tool calls
 TOOL_CALL_REQUESTED = "tool.call.requested"
