@@ -1,10 +1,9 @@
-"""DeepSeek provider using the OpenAI SDK to call DeepSeek's API with streaming."""
+"""DeepSeek provider using deepseek-chat model with proper function calling."""
 
 from __future__ import annotations
 
 import json
 import os
-import time
 from typing import Any
 
 from openai import OpenAI
@@ -16,7 +15,7 @@ from src.layers.tool_registry_10 import ToolRegistryLayerApi
 
 
 DEEPSEEK_BASE_URL = "https://api.deepseek.com"
-_THINKING_TIMEOUT = 5.0  # publish heartbeat every N seconds during long thinking
+_MAX_HISTORY_TOKENS = 12000  # rough char budget for conversation history
 
 
 def _get_client() -> OpenAI | None:
@@ -27,13 +26,45 @@ def _get_client() -> OpenAI | None:
     return OpenAI(api_key=key, base_url=DEEPSEEK_BASE_URL)
 
 
+def _truncate(text: str, max_chars: int = 2000) -> str:
+    """Truncate long text, keeping start and end visible."""
+    if len(text) <= max_chars:
+        return text
+    half = max_chars // 2
+    return f"{text[:half]}\n... [truncated {len(text) - max_chars} chars] ...\n{text[-half:]}"
+
+
+def _compress_history(messages: list[dict[str, Any]]) -> None:
+    """Compress conversation history in-place to stay within token budget.
+
+    Compresses old tool results (not the last 2 turns) to 500 chars each.
+    This is the single biggest token saver for multi-step conversations.
+    """
+    if len(messages) <= 4:
+        return
+    # Keep the last 4 messages untouched (system + current exchange), compress older tool results
+    compressible = messages[1:-4] if messages[0].get("role") == "system" else messages[:-4]
+    for msg in compressible:
+        if msg.get("role") == "tool" and msg.get("content"):
+            if len(msg["content"]) > 500:
+                half = 250
+                msg["content"] = (
+                    f"{msg['content'][:half]}... [compressed] ...{msg['content'][-half:]}"
+                )
+
+
 def _stream_and_collect(
     client: OpenAI,
     kwargs: dict[str, Any],
     eventbus: EventBusLayerApi,
     step_count: int,
 ) -> tuple[str, list[dict[str, Any]] | None, dict[str, int] | None]:
-    """Stream a chat completion, publishing reasoning chunks in real-time.
+    """Stream a chat completion, publishing content chunks in real-time.
+
+    deepseek-chat streams both content and tool_calls similarly to OpenAI.
+    Content chunks are published as AGENT_REASONING_CHUNK so the CLI can
+    display incremental output. Tool calls are accumulated from streaming
+    delta chunks.
 
     Returns (full_content, tool_calls_list, usage_dict).
     """
@@ -41,8 +72,6 @@ def _stream_and_collect(
     full_content = ""
     tool_calls_acc: dict[int, dict[str, Any]] = {}
     usage: dict[str, int] | None = None
-    thinking_start = time.time()
-    last_heartbeat = thinking_start
 
     for chunk in stream:
         # Usage info arrives in the final chunk
@@ -61,23 +90,15 @@ def _stream_and_collect(
         if delta is None:
             continue
 
-        # ── Real-time reasoning content ──
-        reasoning = getattr(delta, "reasoning_content", None)
-        if reasoning:
-            now = time.time()
-            elapsed = now - thinking_start
-            eventbus.publish(event_types.AGENT_REASONING_CHUNK, {
-                "chunk": reasoning,
-                "step": step_count,
-                "elapsed_s": round(elapsed, 1),
-            })
-            last_heartbeat = now
-
-        # ── Content (final answer or tool call preamble) ──
+        # Stream content chunks for real-time display
         if delta.content:
             full_content += delta.content
+            eventbus.publish(event_types.AGENT_REASONING_CHUNK, {
+                "chunk": delta.content,
+                "step": step_count,
+            })
 
-        # ── Streaming tool calls ──
+        # Streaming tool calls — same format as OpenAI
         if delta.tool_calls:
             for tc in delta.tool_calls:
                 idx = tc.index
@@ -96,19 +117,6 @@ def _stream_and_collect(
                     if tc.function.arguments:
                         entry["function"]["arguments"] += tc.function.arguments
 
-        # ── Thinking heartbeat — publish a timer every few seconds ──
-        if not reasoning and not delta.content and not delta.tool_calls:
-            now = time.time()
-            if now - last_heartbeat >= _THINKING_TIMEOUT:
-                elapsed = now - thinking_start
-                eventbus.publish(event_types.AGENT_REASONING_CHUNK, {
-                    "chunk": "",
-                    "step": step_count,
-                    "elapsed_s": round(elapsed, 1),
-                    "heartbeat": True,
-                })
-                last_heartbeat = now
-
     tool_calls_list = list(tool_calls_acc.values()) if tool_calls_acc else None
     return full_content, tool_calls_list, usage
 
@@ -121,11 +129,14 @@ def run_deepseek(
     config: RunnerConfig | None = None,
     conversation_history: list[dict[str, Any]] | None = None,
 ) -> str:
-    """Run the agent with DeepSeek reasoner model and tool calling (streaming).
+    """Run the agent with deepseek-chat model and tool calling (streaming).
 
-    Reasoning content is published chunk-by-chunk as AGENT_REASONING_CHUNK
-    so the CLI can display it in real-time. After streaming completes, any
-    tool calls are executed and the loop continues.
+    deepseek-chat natively supports system messages and OpenAI-compatible
+    function calling, unlike deepseek-reasoner. Content is streamed chunk
+    by chunk as AGENT_REASONING_CHUNK for real-time display.
+
+    Tool call retries respect RunnerConfig.max_tool_retries.
+    Tool results are truncated to 2000 chars to save tokens.
     """
     client = _get_client()
     if client is None:
@@ -134,10 +145,9 @@ def run_deepseek(
     cfg = config or RunnerConfig()
     messages: list[dict[str, Any]] = []
 
-    # deepseek-reasoner does not support system messages natively;
-    # prepend system prompt as a user message, then conversation history.
+    # deepseek-chat supports system messages natively
     if system_prompt:
-        messages.append({"role": "user", "content": system_prompt})
+        messages.append({"role": "system", "content": system_prompt})
 
     if conversation_history:
         messages.extend(conversation_history)
@@ -149,6 +159,7 @@ def run_deepseek(
 
     step_count = 0
     max_steps = cfg.max_steps
+    max_retries = cfg.max_tool_retries
 
     eventbus.publish(event_types.AGENT_PLAN_GENERATED, {
         "plan": [],
@@ -159,9 +170,12 @@ def run_deepseek(
     while step_count < max_steps:
         step_count += 1
 
+        # Compress history before each API call to manage token budget
+        _compress_history(messages)
+
         try:
             kwargs: dict[str, Any] = {
-                "model": "deepseek-reasoner",
+                "model": "deepseek-chat",
                 "messages": messages,
                 "max_tokens": 8192,
                 "stream": True,
@@ -185,31 +199,34 @@ def run_deepseek(
         except Exception as e:
             return f"[deepseek] API error: {type(e).__name__}: {e}"
 
-        # Publish reasoning summary
-        reasoning_preview = (content or "")[:500]
-        eventbus.publish(event_types.AGENT_REASONING_SUMMARY, {
-            "steps_completed": step_count,
-            "final_reasoning": reasoning_preview,
-        })
-
+        # No tool calls = final answer
         if not tools or not tool_calls_list:
             answer = content or "(no response)"
             eventbus.publish(event_types.AGENT_ANSWER_PRODUCED, {"answer": answer})
             return answer
 
-        # Reconstruct assistant message with tool calls
-        assistant_msg: dict[str, Any] = {"role": "assistant", "content": content or ""}
+        # Reconstruct assistant message with tool calls for conversation context
+        assistant_msg: dict[str, Any] = {
+            "role": "assistant",
+            "content": content or "",
+        }
+        # Ensure tool_calls is formatted per OpenAI conventions
         assistant_msg["tool_calls"] = tool_calls_list
         messages.append(assistant_msg)
 
-        # Execute each tool call
+        # Execute each tool call (sequential for simplicity)
         tool_results: list[dict[str, Any]] = []
         for tc in tool_calls_list:
             fn_name = tc["function"]["name"]
-            try:
-                fn_args = json.loads(tc["function"]["arguments"])
-            except json.JSONDecodeError:
-                fn_args = {}
+            fn_args_raw = tc["function"]["arguments"]
+
+            # Parse arguments; on failure send empty dict
+            fn_args: dict[str, Any] = {}
+            if fn_args_raw:
+                try:
+                    fn_args = json.loads(fn_args_raw)
+                except json.JSONDecodeError:
+                    fn_args = {}
 
             tool_call_id = tc["id"]
 
@@ -220,14 +237,29 @@ def run_deepseek(
                 "step": step_count,
             })
 
-            result_payload = eventbus.wait_for_tool_result(tool_call_id, timeout=30.0)
+            # Execute with retry support
+            result_payload: dict[str, Any] | None = None
+            for attempt in range(max_retries):
+                result_payload = eventbus.wait_for_tool_result(tool_call_id, timeout=30.0)
+                if result_payload is not None and not result_payload.get("error"):
+                    break
+                if attempt < max_retries - 1:
+                    eventbus.publish(event_types.TOOL_CALL_REQUESTED, {
+                        "tool_call_id": tool_call_id,
+                        "tool_name": fn_name,
+                        "arguments": fn_args,
+                        "step": step_count,
+                        "retry": attempt + 1,
+                    })
+                    result_payload = eventbus.wait_for_tool_result(tool_call_id, timeout=30.0)
 
             if result_payload is None:
-                tool_result_msg = f"Error: tool {fn_name} timed out"
+                tool_result_msg = f"Error: tool {fn_name} timed out after {max_retries} retries"
             elif result_payload.get("error"):
                 tool_result_msg = f"Error: {result_payload['error']}"
             else:
-                tool_result_msg = result_payload.get("output", "(no output)")
+                output = result_payload.get("output", "(no output)")
+                tool_result_msg = _truncate(output, max_chars=2000)
 
             tool_results.append({
                 "role": "tool",

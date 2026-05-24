@@ -66,3 +66,27 @@ def test_guard_unknown_tool() -> None:
         assert False, "should have raised"
     except Exception:
         pass
+
+
+def test_url_guard_allows_public_url() -> None:
+    registry = ToolRegistryLayerApi()
+    args = run_guards("web_fetch", {"url": "https://example.com"}, registry)
+    assert args["url"] == "https://example.com"
+
+
+def test_url_guard_blocks_localhost() -> None:
+    registry = ToolRegistryLayerApi()
+    try:
+        run_guards("web_fetch", {"url": "http://localhost:8080/secret"}, registry)
+        assert False, "should have raised"
+    except Exception:
+        pass
+
+
+def test_url_guard_blocks_internal_ip() -> None:
+    registry = ToolRegistryLayerApi()
+    try:
+        run_guards("web_fetch", {"url": "http://192.168.1.1/admin"}, registry)
+        assert False, "should have raised"
+    except Exception:
+        pass

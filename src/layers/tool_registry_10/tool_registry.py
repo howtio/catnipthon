@@ -9,6 +9,10 @@ from src.layers.tool_registry_10.tools.write_file_definition import WRITE_FILE
 from src.layers.tool_registry_10.tools.patch_file_definition import PATCH_FILE
 from src.layers.tool_registry_10.tools.shell_exec_definition import SHELL_EXEC
 from src.layers.tool_registry_10.tools.git_diff_definition import GIT_DIFF
+from src.layers.tool_registry_10.tools.web_fetch_definition import WEB_FETCH
+from src.layers.tool_registry_10.tools.web_search_definition import WEB_SEARCH
+from src.layers.tool_registry_10.tools.open_browser_definition import OPEN_BROWSER
+from src.layers.tool_registry_10.tools.file_search_definition import FILE_SEARCH
 
 
 _ALL_TOOLS: dict[str, ToolDef] = {
@@ -20,6 +24,10 @@ _ALL_TOOLS: dict[str, ToolDef] = {
         PATCH_FILE,
         SHELL_EXEC,
         GIT_DIFF,
+        WEB_FETCH,
+        WEB_SEARCH,
+        OPEN_BROWSER,
+        FILE_SEARCH,
     ]
 }
 

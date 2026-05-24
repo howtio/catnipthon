@@ -12,6 +12,20 @@ class GuardError(Exception):
     """Base error for guard failures."""
 
 
+def _check_url(url: str) -> None:
+    """Validate URL for web tools."""
+    if not isinstance(url, str) or not url.strip():
+        raise GuardError("URL must be a non-empty string")
+    if not url.startswith(("http://", "https://")):
+        raise GuardError("Only http/https URLs are allowed")
+    # Block common SSRF targets
+    blocked = ("localhost", "127.0.0.1", "0.0.0.0", "[::1]", "169.254.", "10.", "172.16.", "192.168.")
+    import urllib.parse
+    host = urllib.parse.urlparse(url).hostname or ""
+    if any(host.startswith(b) for b in blocked):
+        raise GuardError(f"URL blocked (internal address): {host}")
+
+
 def run_guards(
     tool_name: str,
     arguments: dict[str, Any],
@@ -35,5 +49,11 @@ def run_guards(
     # Command guard (for shell tools)
     if tool_def.category == "shell" and "command" in arguments:
         check_command(str(arguments["command"]))
+
+    # URL guard (for web tools)
+    if tool_def.category == "web":
+        for arg_key in ("url",):
+            if arg_key in arguments and arguments[arg_key]:
+                _check_url(str(arguments[arg_key]))
 
     return arguments

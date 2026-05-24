@@ -78,10 +78,18 @@ def run_lifecycle(
     memory.add_session_entry(f"Task: {task.user_message}")
     memory_block = memory.build_memory_block()
 
-    eventbus.publish(event_types.PROMPT_COMPOSED, {"full_prompt_length": len(enhanced_prompt) + len(memory_block)})
+    # Inject in-process session memory (files read/written, tools used this session)
+    session_block = memory.session.build_context()
+    if session_block:
+        session_block = f"## Session Context (this conversation)\n{session_block}"
+
+    # Combine: persistent memory block + session memory block
+    combined_memory = "\n\n".join(filter(None, [memory_block, session_block]))
+
+    eventbus.publish(event_types.PROMPT_COMPOSED, {"full_prompt_length": len(enhanced_prompt) + len(combined_memory)})
 
     # Build full prompt with context, skills, and memory
-    full_prompt = f"{enhanced_prompt}\n\n{memory_block}" if memory_block else enhanced_prompt
+    full_prompt = f"{enhanced_prompt}\n\n{combined_memory}" if combined_memory else enhanced_prompt
 
     runner_cfg = RunnerConfig(max_steps=15)
 
@@ -108,6 +116,13 @@ def run_lifecycle(
         "duration_ms": run.duration_ms,
         "token_usage": run.token_usage,
     })
+
+    # Update session memory for next turn
+    for tool, count in run.tool_summary.items():
+        for _ in range(count):
+            memory.session.track_tool_call(tool)
+    for fp in run.modified_files:
+        memory.session.track_file_written(fp)
 
     report = build_final_report(run)
     return format_final_report(report)

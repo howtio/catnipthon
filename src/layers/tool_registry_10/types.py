@@ -5,7 +5,7 @@ from typing import Any, Literal
 
 
 PermissionLevel = Literal["low", "medium", "high"]
-ToolCategory = Literal["fs", "shell", "vcs"]
+ToolCategory = Literal["fs", "shell", "vcs", "web"]
 
 
 @dataclass

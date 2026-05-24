@@ -5,7 +5,7 @@ from src.layers.tool_registry_10.types import ToolDef
 
 SHELL_EXEC: ToolDef = ToolDef(
     name="shell_exec",
-    description="Execute a shell command and return its stdout and stderr. Blocking, with a configurable timeout.",
+    description="Run a shell command. Blocking w/ timeout.",
     category="shell",
     permission="high",
     requires=["command_guard"],
@@ -18,7 +18,7 @@ SHELL_EXEC: ToolDef = ToolDef(
             },
             "timeout_ms": {
                 "type": "integer",
-                "description": "Timeout in milliseconds (default: 30000)",
+                "description": "Timeout ms (default: 30000)",
                 "default": 30000,
             },
         },

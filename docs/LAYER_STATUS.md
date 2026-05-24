@@ -77,13 +77,15 @@
 
 ## 07 Memory
 
-**状态**: Phase 2 — 已实现（MemorySnapshot + JSON 持久化）
+**状态**: v4.0 — 已实现（MemorySnapshot + JSON 持久化 + SessionMemory）
 
 **已实现:**
 - MemorySnapshot: sessionEntries / workingSet / observations / carryoverTasks
 - WorkingSet: focusedFilePath / recentFilePaths
 - JSON 持久化到 logs/catnip-memory.json
 - build_memory_block: 格式化记忆块注入
+- SessionMemory: 进程内会话跟踪（files_read, files_written, tool_counts, user_notes, turn_summaries）
+- build_context: 构建紧凑会话上下文注入 system prompt
 - wrapper: MemoryLayerApi 公开接口
 
 **待实现:**
@@ -92,11 +94,11 @@
 
 ## 08 Runner
 
-**状态**: v3.0 — 已实现（DeepSeek reasoner + 推理路径捕获 + 追加要求注入）
+**状态**: v4.0 — 已实现（DeepSeek chat + token 优化 + 追加要求注入）
 
 **已实现:**
 - provider: heuristic_plan（关键词规则路由）
-- deepseek_provider: 基于 OpenAI SDK 的 DeepSeek API 调用（deepseek-reasoner + reasoning_content 捕获 + 追加要求注入）
+- deepseek_provider: 基于 OpenAI SDK 的 DeepSeek API 调用（deepseek-chat + 系统消息原生支持 + 历史压缩 + 结果截断 + 追加要求注入）
 - agent_runner: agent loop（计划 → 工具请求 → 等待结果 → 步骤完成 → 最终回答）
 - wrapper: RunnerLayerApi 公开接口（run + config + system_prompt + conversation_history）
 
@@ -116,26 +118,24 @@
 
 ## 10 Tool Registry
 
-**状态**: Phase 3 — 已实现（6 MVP 工具定义 + OpenAPI schema 输出）
+**状态**: v4.0 — 已实现（10 工具定义 + web 分类 + OpenAPI schema 输出）
 
 **已实现:**
-- 6 个工具定义：list_files / read_file / write_file / patch_file / shell_exec / git_diff
-- 分类：fs / shell / vcs
+- 10 个工具定义：list_files / read_file / write_file / patch_file / shell_exec / git_diff / web_fetch / web_search / open_browser / file_search
+- 分类：fs / shell / vcs / **web**
 - 权限等级：low / medium / high
+- 工具描述全面压缩（30-50% 更短）
 - ToolRegistry: 注册、查询、分类筛选、OpenAI schema 输出
 - wrapper: ToolRegistryLayerApi 公开接口
 
-**待实现:**
-- validate_tool_schema
-- browser/web 工具（1.x 扩展）
-
 ## 11 Executor
 
-**状态**: Phase 5 — 已实现（6 真实工具 + 3 层 Guard + 统一入口）
+**状态**: v4.0 — 已实现（10 真实工具 + 3 层 Guard + URL Guard + 统一入口）
 
 **已实现:**
-- tools.py: 6 个真实工具（list_files / read_file / write_file / patch_file / shell_exec / git_diff）
-- guard.py: Guard 统一入口（自动识别工具类别运行对应 guard）
+- tools.py: 10 个真实工具（list_files / read_file / write_file / patch_file / shell_exec / git_diff / web_fetch / web_search / open_browser / file_search）
+- guard.py: Guard 统一入口（自动识别工具类别运行对应 guard，含 _check_url SSRF 防护）
+- policy/url_guard: SSRF 防护（拦截 localhost/127.0.0.1/私有 IP）
 - policy/permission_guard.py: low/medium/high 三级权限检查
 - policy/path_guard.py: workspace 路径边界检查
 - policy/command_guard.py: 危险命令阻止 + 白名单放行

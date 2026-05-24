@@ -60,6 +60,43 @@
 
 ## 最近记录
 
+### 2026-05-24 / v4.0 — 工具增强 + 会话记忆 + Token 优化
+
+- **版本**: `4.0`
+- **改动部分**:
+  - **模型切换**: `deepseek-reasoner` → `deepseek-chat`（修复工具调用卡死 + 系统消息原生支持 + 大幅减少 token）
+  - **新增 4 个工具**:
+    - `web_fetch(query)` — httpx URL 抓取 + HTML 标签剥离，10KB 限制，15s 超时
+    - `web_search(query, max_results=5)` — DuckDuckGo HTML 搜索，正则解析标题/链接/摘要
+    - `open_browser(url)` — Python webbrowser.open，仅允许 http/https
+    - `file_search(pattern, content, max_results)` — 名称 glob 或内容 grep，跳过 .venv/.git/__pycache__
+  - **Token 优化**:
+    - 工具描述全面压缩 30-50%
+    - `_compress_history()` — 旧 tool 结果截断为 500 字符
+    - `_truncate()` — 工具结果限制 2000 字符
+  - **会话记忆**: `SessionMemory` 进程内跟踪 files_read/files_written/tool_counts/user_notes，自动注入 system prompt
+  - **安全增强**: `_check_url()` SSRF 防护（拦截 localhost/127.0.0.1/169.254./10./172.16./192.168.）
+  - **新分类**: ToolCategory 新增 `"web"` 类型
+  - **工具总量**: 6 MVP → 10 个
+- **修改文件**:
+  - `src/layers/runner_08/deepseek_provider.py` — 模型切换 + 历史压缩 + 结果截断
+  - `src/layers/executor_11/tools.py` — 新增 4 个 web/file 工具
+  - `src/layers/executor_11/guard.py` — 新增 _check_url SSRF 防护
+  - `src/layers/executor_11/execute_tool.py` — 注册 10 个工具实现
+  - `src/layers/tool_registry_10/types.py` — 新增 web 分类
+  - `src/layers/tool_registry_10/tool_registry.py` — 注册 10 个工具
+  - `src/layers/tool_registry_10/tools/*.py` — 工具描述压缩
+  - `src/layers/memory_07/session_memory.py` — 新建 SessionMemory
+  - `src/layers/memory_07/wrapper.py` — 集成 SessionMemory
+  - `src/layers/harness_04/run_lifecycle.py` — 注入 session 上下文 + 跟踪工具调用
+  - `tests/test_tools_v4.py` — 新建 6 个工具测试
+  - `tests/test_guards.py` — 新增 3 个 URL 守卫测试
+  - `tests/test_tool_registry.py` — 更新 6→10 工具断言
+  - `tests/test_deepseek_provider.py` — 更新 system prompt 断言
+- **验证**: mypy 95 文件 0 错误，pytest 69/69 通过
+- **提交**: （待 commit）
+- **下一步**: 等待用户反馈，规划 5.0 方向
+
 ### 2026-05-24 / v3.0 — 队列层重构 + 推理路径显示 + CLI 视觉升级
 
 - **版本**: `3.0`

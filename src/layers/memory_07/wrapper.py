@@ -5,18 +5,25 @@ import time
 from pathlib import Path
 
 from src.layers.memory_07.types import MemorySnapshot, WorkingSet
+from src.layers.memory_07.session_memory import SessionMemory
 
 
 DEFAULT_MEMORY_FILE = Path(__file__).resolve().parent.parent.parent.parent / "logs" / "catnip-memory.json"
 
 
 class MemoryLayerApi:
-    """07-memory public API: session/working/project memory management."""
+    """07-memory public API: session/working/project memory management.
+
+    ``session`` attribute: in-process ``SessionMemory`` for tracking files,
+    tools, and user context across multiple turns within the same session
+    (not persisted to disk).
+    """
 
     def __init__(self, storage_path: str | Path | None = None) -> None:
         self._path = Path(storage_path) if storage_path else DEFAULT_MEMORY_FILE
         self._path.parent.mkdir(parents=True, exist_ok=True)
         self._memory = self._load()
+        self.session = SessionMemory()
 
     # --- public API ---
 

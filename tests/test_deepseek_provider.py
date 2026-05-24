@@ -130,8 +130,9 @@ def test_system_prompt_included() -> None:
         run_deepseek(task, eventbus, registry, system_prompt="Be helpful.", config=cfg)
 
     call_kwargs = mock_client.chat.completions.create.call_args[1]
+    assert call_kwargs.get("model") == "deepseek-chat"
     messages = call_kwargs["messages"]
-    assert messages[0]["role"] == "user"
+    assert messages[0]["role"] == "system"
     assert messages[0]["content"] == "Be helpful."
     assert messages[1]["role"] == "user"
     assert messages[1]["content"] == "hello"

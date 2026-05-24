@@ -1,14 +1,17 @@
-"""Real implementations of the 6 MVP tools."""
+"""Real implementations of all tools — MVP 6 + v4.0 web/search/browser."""
 
 from __future__ import annotations
 
-import json
+import re
 import subprocess
-import sys
+import webbrowser
 from pathlib import Path
 
 
 WORKSPACE_ROOT = Path(__file__).resolve().parent.parent.parent.parent
+
+
+# ── MVP tools ────────────────────────────────────────────────────────────────
 
 
 def list_files(path: str = ".") -> str:
@@ -35,8 +38,7 @@ def read_file(file_path: str) -> str:
     if not target.is_file():
         return f"Error: file not found: {file_path}"
     try:
-        content = target.read_text(encoding="utf-8")
-        return content
+        return target.read_text(encoding="utf-8")
     except UnicodeDecodeError:
         return f"Error: binary file or non-UTF-8 encoding: {file_path}"
     except PermissionError:
@@ -121,7 +123,6 @@ def git_diff() -> str:
         )
         if result.stdout:
             return result.stdout
-        # Check for staged changes too
         staged = subprocess.run(
             ["git", "diff", "--cached"],
             cwd=WORKSPACE_ROOT,
@@ -138,3 +139,125 @@ def git_diff() -> str:
         return "Error: git not available"
     except OSError as e:
         return f"Error: {e}"
+
+
+# ── v4.0 tools: web fetch / search / browser / file search ──────────────────
+
+
+def _fetch_url(url: str, timeout_s: int = 15) -> str:
+    """Fetch URL content via httpx. Returns text (HTML stripped)."""
+    try:
+        import httpx
+    except ImportError:
+        return "Error: httpx not available"
+    try:
+        with httpx.Client(timeout=timeout_s, follow_redirects=True) as client:
+            resp = client.get(url, headers={"User-Agent": "Mozilla/5.0"})
+            resp.raise_for_status()
+            text = resp.text
+            text = re.sub(r"<[^>]+>", " ", text)
+            text = re.sub(r"\s+", " ", text).strip()
+            if len(text) > 10000:
+                text = text[:10000] + "\n... [truncated to 10KB]"
+            return text
+    except httpx.TimeoutException:
+        return f"Error: timeout fetching {url}"
+    except httpx.HTTPStatusError as e:
+        return f"Error: HTTP {e.response.status_code} for {url}"
+    except Exception as e:
+        return f"Error: {e}"
+
+
+def web_fetch(url: str) -> str:
+    """Fetch a URL and return its text content (HTML stripped)."""
+    if not url.startswith(("http://", "https://")):
+        return "Error: only http/https URLs are allowed"
+    return _fetch_url(url)
+
+
+def web_search(query: str, max_results: int = 5) -> str:
+    """Search the web via DuckDuckGo HTML interface."""
+    import urllib.parse
+
+    try:
+        import httpx
+    except ImportError:
+        return "Error: httpx not available"
+
+    max_results = max(1, min(max_results, 10))
+    encoded = urllib.parse.quote(query)
+    url = f"https://html.duckduckgo.com/html/?q={encoded}"
+
+    try:
+        with httpx.Client(timeout=15, follow_redirects=True) as client:
+            resp = client.get(url, headers={"User-Agent": "Mozilla/5.0"})
+            resp.raise_for_status()
+            html = resp.text
+    except Exception as e:
+        return f"Error: search failed: {e}"
+
+    results: list[str] = []
+    link_pat = re.compile(r'class="result__a"[^>]*href="(https?://[^"]+)"[^>]*>(.*?)</a>')
+    snippet_pat = re.compile(r'class="result__snippet"[^>]*>(.*?)</(?:a|span)>', re.DOTALL)
+
+    links = link_pat.findall(html)
+    snippets = snippet_pat.findall(html)
+
+    for i, (href, title_text) in enumerate(links[:max_results]):
+        title = re.sub(r"<[^>]+>", "", title_text).strip()
+        snippet = ""
+        if i < len(snippets):
+            snippet = re.sub(r"<[^>]+>", "", snippets[i]).strip()
+        results.append(f"{i+1}. {title}\n   {href}")
+        if snippet:
+            results.append(f"   {snippet}")
+
+    if not results:
+        return f"(no results for: {query})"
+    return "\n".join(results)
+
+
+def open_browser(url: str) -> str:
+    """Open a URL in the default browser."""
+    if not url.startswith(("http://", "https://")):
+        return "Error: only http/https URLs are allowed"
+    try:
+        webbrowser.open(url)
+        return f"Opened browser: {url}"
+    except Exception as e:
+        return f"Error: {e}"
+
+
+def file_search(pattern: str, content: str = "", max_results: int = 20) -> str:
+    """Search files by name glob or text content in workspace."""
+    max_results = max(1, min(max_results, 50))
+    matches: list[str] = []
+    skip_dirs = {".venv", ".git", "__pycache__", "node_modules"}
+
+    if content:
+        for f in WORKSPACE_ROOT.rglob(pattern):
+            if any(p in skip_dirs for p in f.parts):
+                continue
+            if not f.is_file():
+                continue
+            try:
+                text = f.read_text(encoding="utf-8", errors="replace")
+                if content in text:
+                    rel = f.relative_to(WORKSPACE_ROOT)
+                    matches.append(str(rel))
+                    if len(matches) >= max_results:
+                        break
+            except Exception:
+                continue
+    else:
+        for f in WORKSPACE_ROOT.rglob(pattern):
+            if any(p in skip_dirs for p in f.parts):
+                continue
+            rel = f.relative_to(WORKSPACE_ROOT)
+            matches.append(str(rel))
+            if len(matches) >= max_results:
+                break
+
+    if not matches:
+        return f"(no matches for: {pattern})"
+    return "\n".join(matches)

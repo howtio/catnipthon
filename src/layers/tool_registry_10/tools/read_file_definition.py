@@ -5,7 +5,7 @@ from src.layers.tool_registry_10.types import ToolDef
 
 READ_FILE: ToolDef = ToolDef(
     name="read_file",
-    description="Read the contents of a file. Path must be within the workspace.",
+    description="Read a file within the workspace.",
     category="fs",
     permission="low",
     parameters={
@@ -13,7 +13,7 @@ READ_FILE: ToolDef = ToolDef(
         "properties": {
             "file_path": {
                 "type": "string",
-                "description": "Path to the file relative to workspace root",
+                "description": "Path relative to workspace root",
             },
         },
         "required": ["file_path"],

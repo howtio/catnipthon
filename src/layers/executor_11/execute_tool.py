@@ -12,6 +12,10 @@ from src.layers.executor_11.tools import (
     patch_file,
     shell_exec,
     git_diff,
+    web_fetch,
+    web_search,
+    open_browser,
+    file_search,
 )
 
 
@@ -22,6 +26,10 @@ _TOOL_IMPLS: dict[str, Any] = {
     "patch_file": patch_file,
     "shell_exec": shell_exec,
     "git_diff": git_diff,
+    "web_fetch": web_fetch,
+    "web_search": web_search,
+    "open_browser": open_browser,
+    "file_search": file_search,
 }
 
 

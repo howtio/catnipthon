@@ -7,7 +7,7 @@
 
 ## 当前版本
 
-`3.1`（线程池 + Claude Code CLI + 实时注入）
+`4.0`（工具增强 + 会话记忆 + Token 优化）
 
 ---
 
@@ -15,7 +15,7 @@
 
 | 项目 | 状态 |
 |------|------|
-| 版本 | `3.1` |
+| 版本 | `4.0` |
 | 脚手架 1.0（基础文档 + 目录） | 已完成 |
 | 脚手架 2.0（Python 工程化 + 导入策略） | 已完成 |
 | 脚手架 3.0（马拉松接力 + 防漂移 + CLI开机动画） | 已完成 |
@@ -29,20 +29,12 @@
 | Phase 7（日志、验收、final report） | **已实现** ✅ |
 | 1.0 MVP | **已实现** 🏆 |
 | CLI 2.0（交互式 REPL + 实时进度） | **已实现** ✅ |
-| typecheck | 通过（92 文件，0 错误） |
-| 测试 | 60 个，全部通过 |
-
----
-
-## 进行中
-
-- 等待用户反馈，规划 4.0 方向
-
----
-
-## 未开始
-
-- Phase 1 ~ 7
+| v4.0 工具增强（web_fetch, web_search, open_browser, file_search） | **已实现** ✅ |
+| 会话记忆（SessionMemory，进程内跟踪） | **已实现** ✅ |
+| Token 优化（紧凑描述、历史压缩、结果截断） | **已实现** ✅ |
+| URL 安全守卫（SSRF 防护） | **已实现** ✅ |
+| typecheck | 通过（95 文件，0 错误） |
+| 测试 | 69 个，全部通过 |
 
 ---
 
@@ -68,3 +60,15 @@
   - API Key 加载新增 PowerShell 命令
   - 浏览器默认命令设为 `start`（Windows）
   - CLAUDE.md / ONBOARD.md 全面同步 Windows 优先指令
+- v4.0 工具增强（2026-05-24）：
+  - 切换模型：`deepseek-reasoner` → `deepseek-chat`（修复工具调用卡死 + 大幅减少 token 消耗）
+  - 新增 4 个工具：`web_fetch`（httpx 抓取）、`web_search`（DuckDuckGo HTML 搜索）、`open_browser`（浏览器打开）、`file_search`（名称/内容搜索）
+  - 工具总量：6 MVP → 10 个
+  - 新增 `web` 工具分类（ToolCategory）
+  - URL Guard：SSRF 防护（拦截 localhost/私有 IP）
+  - 工具描述全面压缩（30-50% 更短）
+- 会话记忆 + Token 优化（2026-05-24）：
+  - `SessionMemory`：进程内会话跟踪（文件读写、工具调用、用户备注）
+  - 历史压缩：`_compress_history()` 旧 tool 结果截断为 500 字符
+  - 结果截断：`_truncate()` 工具结果限制 2000 字符
+  - Session 上下文自动注入 system prompt
