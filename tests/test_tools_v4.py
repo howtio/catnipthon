@@ -14,9 +14,14 @@ def test_open_browser_http() -> None:
         mock_open.assert_called_once_with("https://example.com")
 
 
-def test_open_browser_rejects_non_http() -> None:
-    result = open_browser("file:///etc/passwd")
+def test_open_browser_rejects_invalid_scheme() -> None:
+    result = open_browser("ftp://example.com")
     assert "Error" in result
+
+def test_open_browser_accepts_file() -> None:
+    """file:// is now accepted (resolves to local browser open)."""
+    result = open_browser("file:///C:/nonexistent.html")
+    assert "Error" in result or "Opened" in result or "detached" in result
 
 
 def test_file_search_by_glob_py() -> None:

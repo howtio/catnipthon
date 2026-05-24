@@ -29,7 +29,7 @@ WHITELIST_PREFIXES = [
     "npm ", "node ", "npx",
     "which", "where",
     ".venv/Scripts/python", ".venv/bin/python",
-    "cls", "clear",
+    "start", "cls", "clear",
 ]
 
 

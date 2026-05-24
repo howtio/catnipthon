@@ -218,14 +218,31 @@ def web_search(query: str, max_results: int = 5) -> str:
 
 
 def open_browser(url: str) -> str:
-    """Open a URL in the default browser."""
-    if not url.startswith(("http://", "https://")):
-        return "Error: only http/https URLs are allowed"
-    try:
-        webbrowser.open(url)
-        return f"Opened browser: {url}"
-    except Exception as e:
-        return f"Error: {e}"
+    """Open a URL or local file in the default browser (non-blocking, 5s timeout)."""
+    # Resolve local file paths to file:// URLs
+    if not url.startswith(("http://", "https://", "file://")):
+        p = Path(url)
+        if p.exists():
+            url = p.resolve().as_uri()
+        else:
+            # Try relative to workspace
+            wp = WORKSPACE_ROOT / url
+            if wp.exists():
+                url = wp.resolve().as_uri()
+            else:
+                return f"Error: file not found: {url} (use http/https or a valid local path)"
+    import concurrent.futures
+    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as exe:
+        fut = exe.submit(webbrowser.open, url)
+        try:
+            result = fut.result(timeout=5.0)
+            if result:
+                return f"Opened browser: {url}"
+            return "Error: webbrowser.open returned False (no browser found)"
+        except concurrent.futures.TimeoutError:
+            return f"Opened browser (detached): {url}"
+        except Exception as e:
+            return f"Error: {e}"
 
 
 def file_search(pattern: str, content: str = "", max_results: int = 20) -> str:
