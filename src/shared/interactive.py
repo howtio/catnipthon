@@ -156,9 +156,6 @@ class ProgressTracker:
         elapsed = event.payload.get("elapsed_s", 0)
         heartbeat = event.payload.get("heartbeat", False)
         with _print_lock:
-            if not getattr(self, '_thinking_started', False):
-                self._thinking_started = True
-                print()  # push the "> " prompt up so thinking stays on its own line
             print_thinking(chunk, elapsed_s=elapsed, heartbeat=heartbeat)
 
     def _on_answer(self, event: Event) -> None:

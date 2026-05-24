@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import time
 from typing import Any
 
 from openai import OpenAI
@@ -72,6 +73,8 @@ def _stream_and_collect(
     full_content = ""
     tool_calls_acc: dict[int, dict[str, Any]] = {}
     usage: dict[str, int] | None = None
+    thinking_start = time.time()
+    last_heartbeat = 0.0
 
     for chunk in stream:
         # Usage info arrives in the final chunk
@@ -93,9 +96,23 @@ def _stream_and_collect(
         # Stream content chunks for real-time display
         if delta.content:
             full_content += delta.content
+            elapsed = time.time() - thinking_start
             eventbus.publish(event_types.AGENT_REASONING_CHUNK, {
                 "chunk": delta.content,
                 "step": step_count,
+                "elapsed_s": elapsed,
+            })
+
+        # Periodic heartbeat so the user sees thinking is still alive
+        now = time.time()
+        if now - last_heartbeat >= 5.0 and not delta.content:
+            last_heartbeat = now
+            elapsed = now - thinking_start
+            eventbus.publish(event_types.AGENT_REASONING_CHUNK, {
+                "chunk": "",
+                "step": step_count,
+                "elapsed_s": elapsed,
+                "heartbeat": True,
             })
 
         # Streaming tool calls — same format as OpenAI

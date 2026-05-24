@@ -164,7 +164,7 @@ def print_result_claude(success: bool, duration_s: float, tokens: int = 0) -> No
         status = _c(f"{SYM_OK} ({duration_s:.1f}s{token_str})", OK)
     else:
         status = _c(f"{SYM_FAIL} ({duration_s:.1f}s{token_str})", ERROR)
-    print(f"\033[2K\r  {SYM_SUB} {status}")
+    print(f"\033[1A\033[2K  {SYM_SUB} {status}")
 
 
 def print_summary_claude(
@@ -194,26 +194,43 @@ def print_summary_claude(
         print(f"  {SYM_SUB} {_c('Tools:', DIM)} {tool_list}")
 
 
+# Track whether the current thinking line is the first chunk or a subsequent update
+# Used by print_thinking to decide between new line vs overwrite
+_thinking_active = False
+
+
 def print_thinking(text: str, elapsed_s: float = 0, heartbeat: bool = False) -> None:
     """Print Claude Code-style thinking/reasoning text with elapsed time.
 
-    Regular reasoning:  > thinking text here...
+    Regular reasoning:  > thinking text here... (5.2s)
     Heartbeat ping:     > thinking... (5.2s)
-    Uses end="" + flush=True so chunks stream inline without newlines.
+
+    Uses \033[1A (cursor up) to overwrite the previous thinking line
+    instead of \r, avoiding corruption of the input prompt line.
     """
+    global _thinking_active
+    if not text and not heartbeat:
+        return
+    elapsed_str = f" ({elapsed_s:.1f}s)" if elapsed_s else ""
     if heartbeat:
-        print(f"\033[2K\r  {_c(f'> thinking... ({elapsed_s:.0f}s)', DIM)}", end="", flush=True)
-        return
-    if not text:
-        return
-    time_str = f" ({elapsed_s:.1f}s)" if elapsed_s else ""
-    line = text[:80].replace("\n", " ")
-    print(f"\033[2K\r  {_c(f'> {line}{time_str}', DIM)}", end="", flush=True)
+        line = f"> thinking...{elapsed_str}"
+    else:
+        txt = text[:80].replace("\n", " ")
+        line = f"> {txt}{elapsed_str}"
+
+    if _thinking_active:
+        # Overwrite previous thinking line: go up 1 line, clear it, print
+        print(f"\033[1A\033[2K  {_c(line, DIM)}")
+    else:
+        # First thinking chunk: print on a fresh line, mark active
+        print(f"  {_c(line, DIM)}")
+        _thinking_active = True
 
 
 def print_thinking_done() -> None:
-    """Finalize the thinking line (move to next line)."""
-    print()
+    """Finalize the thinking line. No-op since print_thinking already adds newline."""
+    global _thinking_active
+    _thinking_active = False
 
 
 def print_user_message(msg: str) -> None:
