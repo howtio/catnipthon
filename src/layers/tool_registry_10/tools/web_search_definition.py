@@ -7,7 +7,7 @@ WEB_SEARCH: ToolDef = ToolDef(
     name="web_search",
     description="Search the web via DuckDuckGo. Returns top result snippets.",
     category="web",
-    permission="medium",
+    permission="high",
     parameters={
         "type": "object",
         "properties": {
