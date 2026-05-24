@@ -57,6 +57,21 @@
 ---
 
 ## 最近记录
+### 2026-05-24 / Phase 1 — Gateway + Queue + Worker 最小链路打通
+
+- **版本**: `0.1`
+- **改动部分**:
+  - `02-queue` — 完整实现：InMemoryQueue（FIFO deque）、TaskStatusStore、enqueue/dequeue 逻辑、QueueLayerApi wrapper
+  - `03-worker` — 完整实现：WorkerLoop 同步消费循环、process_run_task（可注入 callable）、mark_task_status、handle_worker_error、WorkerLayerApi wrapper
+  - `01-gateway` — 完整实现：CLI 参数解析（argparse）、ValidateUserInput、create_run_task（UUID）、GatewayLayerApi wrapper
+  - `bootstrap.py` — Wire Gateway + Queue + Worker 三层
+  - `main.py` — 更新入口：接收 CLI 参数 → 走完整 pipeline
+  - 新增测试 `tests/test_queue.py` — 4 个测试
+- **验证**: mypy 39 文件 0 问题，pytest 4/4 通过，冒烟测试通过
+- **提交**: TBD
+- **下一步**: Phase 2 — Harness + Context + Skills + Memory
+
+
 
 ### 2026-05-23 / Windows 特化 — catnipthon 全面 Windows 优先适配
 

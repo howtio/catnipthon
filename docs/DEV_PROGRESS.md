@@ -7,7 +7,7 @@
 
 ## 当前版本
 
-`0.0`（脚手架 3.0）
+`0.1`（Phase 1：Gateway + Queue + Worker）
 
 ---
 
@@ -15,27 +15,26 @@
 
 | 项目 | 状态 |
 |------|------|
-| 版本 | `0.0` |
+| 版本 | `0.1` |
 | 脚手架 1.0（基础文档 + 目录） | 已完成 |
 | 脚手架 2.0（Python 工程化 + 导入策略） | 已完成 |
 | 脚手架 3.0（马拉松接力 + 防漂移 + CLI开机动画） | 已完成 |
 | Windows 特化（路径/命令/配置 Windows 优先） | 已完成 |
-| Phase 1（Gateway + Queue + Worker） | 未开始（曾实现后在 3.0 重构中剥离） |
-| Phase 2（Harness + Context + Skills + Memory） | 未开始（曾实现后在 3.0 重构中剥离） |
+| Phase 1（Gateway + Queue + Worker） | **已实现** ✅ |
 | Phase 2（Harness + Context + Skills + Memory） | 未开始 |
 | Phase 3（Runner + EventBus 骨架） | 未开始 |
 | Phase 4（Tool Registry + Executor 骨架） | 未开始 |
 | Phase 5（最小工具集） | 未开始 |
 | Phase 6（DeepSeek 接入 + tool calling） | 未开始 |
 | Phase 7（日志、验收、final report） | 未开始 |
-| typecheck | 通过（shared 组件） |
-| 测试 | 暂无（纯脚手架） |
+| typecheck | 通过（39 文件，0 错误） |
+| 测试 | 4 个，全部通过 |
 
 ---
 
 ## 进行中
 
-- 无（脚手架 3.0 就绪，等待首次代码施工）
+- Phase 2（Harness + Context + Skills + Memory）
 
 ---
 

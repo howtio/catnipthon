@@ -1,25 +1,25 @@
-"""Scaffold: dependency assembly point.
-
-Wire your layer instances here and return them as an App.
-See docs/CONSTRUCTION_PLAN.md for the phase-by-phase roadmap.
-"""
+"""Phase 1 wiring: Gateway + Queue + Worker."""
 
 from __future__ import annotations
 
 from dataclasses import dataclass
 
+from src.layers.gateway_01 import GatewayLayerApi
+from src.layers.queue_02 import QueueLayerApi
+from src.layers.worker_03 import WorkerLayerApi
+
 
 @dataclass
 class App:
-    """Replace with your wired layer instances as you implement each Phase."""
+    gateway: GatewayLayerApi
+    queue: QueueLayerApi
+    worker: WorkerLayerApi
 
 
 def bootstrap() -> App:
-    """Create and wire your layer instances.
+    """Create and wire layer instances."""
+    queue = QueueLayerApi()
+    worker = WorkerLayerApi(queue)
+    gateway = GatewayLayerApi(queue, worker)
 
-    Example (Phase 1):
-        from src.layers.queue_02 import QueueLayerApi
-        from src.layers.worker_03 import WorkerLayerApi
-        ...
-    """
-    return App()
+    return App(gateway=gateway, queue=queue, worker=worker)
