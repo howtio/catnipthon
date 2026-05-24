@@ -70,7 +70,7 @@
   - `bootstrap.py` — Wire 全部 11 层
   - 新增测试 11 个（runner 3、executor 3、tool_registry 5、waitForToolResult 3，但实际新增只 11 个）
 - **验证**: mypy 83 文件 0 问题，pytest 38/38 通过，冒烟测试通过（Runner heuristic: list_files + git_diff 计划执行）
-- **提交**: TBD
+- **提交**: f581ed2
 - **下一步**: Phase 4 — Tool Registry 完善 + Executor Guard 框架
 
 
