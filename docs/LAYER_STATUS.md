@@ -6,17 +6,17 @@
 
 ## 01 Gateway
 
-**状态**: Phase 1 — 已实现（基于 argparse 的最小 CLI 管道）
+**状态**: CLI 2.0 — 已实现（基于 argparse 的 CLI 管道 + 交互式 REPL）
 
 **已实现:**
 - parse_cli_args: argparse 参数解析
 - validate_user_input: 非空校验
 - create_run_task: UUID + RunTask 创建
 - wrapper: GatewayLayerApi 公开接口（run_cli）
-
-**待实现:**
-- 交互模式 readline
-- 结果格式化增强
+- 交互式 REPL（src/shared/interactive.py）
+- 实时进度跟踪（ProgressTracker 通过 EventBus 订阅显示 tool 调用/步骤完成）
+- 提供商运行时切换（/provider heuristic|deepseek）
+- 内部命令（/help /exit /clear /history）
 
 ## 02 Queue
 

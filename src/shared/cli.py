@@ -10,15 +10,17 @@ from __future__ import annotations
 from src.shared.version import VERSION, VERSION_TAG
 
 W = 46  # internal box width (between border chars)
+H_LINE = "\u2500" * W
+EQUAL_LINE = "=" * W
 
 TITLE = "catnip agent"
 SUBTITLE = "11-Layer Coding Agent Runtime"
 
 LAYERS = (
-    "gateway_01  →  queue_02    →  worker_03\n"
-    "harness_04  →  context_05  →  skills_06\n"
-    "memory_07   →  runner_08   →  eventbus_09\n"
-    "tool_registry_10 → executor_11"
+    "gateway_01  \u2192  queue_02    \u2192  worker_03\n"
+    "harness_04  \u2192  context_05  \u2192  skills_06\n"
+    "memory_07   \u2192  runner_08   \u2192  eventbus_09\n"
+    "tool_registry_10 \u2192 executor_11"
 )
 
 
@@ -26,20 +28,20 @@ def _pad_center(text: str, width: int = W) -> str:
     return text.center(width)
 
 
-BANNER = f"""╔{'═' * W}╗
-║{_pad_center('')}║
-║{_pad_center(TITLE + '  ' + VERSION_TAG)}║
-║{_pad_center(SUBTITLE)}║
-║{_pad_center('')}║
-╠{'═' * W}╣
-║{'Layers'.center(W)}║
-╠{'═' * W}╣"""
+BANNER = f"""\u255e{'═' * W}\u255d
+\u2551{_pad_center('')}\u2551
+\u2551{_pad_center(TITLE + '  ' + VERSION_TAG)}\u2551
+\u2551{_pad_center(SUBTITLE)}\u2551
+\u2551{_pad_center('')}\u2551
+\u2560{'═' * W}\u2563
+\u2551{'Layers'.center(W)}\u2551
+\u2560{'═' * W}\u2563"""
 
-BANNER_BOTTOM = f"╚{'═' * W}╝"
+BANNER_BOTTOM = f"\u255a{'═' * W}\u255d"
 
 
 def _layer_lines() -> list[str]:
-    return ["║" + line.center(W) + "║" for line in LAYERS.split("\n")]
+    return ["\u2551" + line.center(W) + "\u2551" for line in LAYERS.split("\n")]
 
 
 def print_header() -> None:
@@ -50,16 +52,16 @@ def print_header() -> None:
 
 
 def print_task_bar(user_message: str) -> None:
-    print(f"\n{'─' * W}")
+    print(f"\n{H_LINE}")
     print(f"  Task: {user_message}")
-    print(f"{'─' * W}")
+    print(H_LINE)
 
 
 def print_result_ok(task_id: str, result: str) -> None:
     print(f"\n  [OK] Task {task_id} completed")
-    print(f"{'─' * W}")
+    print(H_LINE)
     print(result)
-    print(f"{'─' * W}")
+    print(H_LINE)
 
 
 def print_result_fail(task_id: str, error: str | None) -> None:

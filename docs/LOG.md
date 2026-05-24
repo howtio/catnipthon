@@ -13,6 +13,7 @@
 | 0.1 | `docs/logs/LOG-0.0.md`（已剥离） |
 | 0.2 | `docs/logs/LOG-0.0.md`（已剥离） |
 | 1.0 | `docs/logs/LOG-1.0.md` |
+| 2.0 | `docs/logs/LOG-2.0.md` |
 
 ---
 
@@ -58,6 +59,19 @@
 ---
 
 ## 最近记录
+
+### 2026-05-24 / CLI 2.0 — 交互式 REPL + 实时进度 + DeepSeek 真实环境测试
+
+- **版本**: `2.0`
+- **改动部分**:
+  - `shared/interactive.py` — 新增交互式 REPL：提示符、内部命令（/exit /help /provider /clear /history）、ProgressTracker（通过 EventBus 订阅实时显示 tool 调用过程）
+  - `shared/cli.py` — 更新 H_LINE/EQUAL_LINE 常量，Unicode 框线改用转义序列兼容
+  - `main.py` — 无参数时启动交互式 REPL，有参数时保持批量模式；Windows GBK 编码兼容
+  - DeepSeek 真实环境测试通过（中文提问 → tool calling → 中文回答全链路可跑）
+- **验证**: mypy 92 文件 0 问题，pytest 60/60 通过
+- **提交**: （待 commit）
+- **下一步**: 等待用户反馈，规划 3.0 方向
+
 
 ### 2026-05-24 / 1.0 MVP — 全链路可跑，通过验收任务
 
