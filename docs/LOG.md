@@ -71,7 +71,7 @@
   - `bootstrap.py` — Wire 全部 8 层
   - 新增测试 20 个（eventbus 5、context 4、skills 5、memory 4、harness 2）
 - **验证**: mypy 65 文件 0 问题，pytest 24/24 通过，冒烟测试通过（Context 8 docs + Skills: testing + Memory: 187 chars）
-- **提交**: TBD
+- **提交**: 43cf920
 - **下一步**: Phase 3 — Runner + EventBus 完善（tool.call.requested/result 路由）
 
 ### 2026-05-24 / Phase 1 — Gateway + Queue + Worker 最小链路打通
