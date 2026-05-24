@@ -102,17 +102,17 @@
 
 ## 08 Runner
 
-**状态**: Phase 3 — 已实现（heuristic provider + agent loop + tool request/result）
+**状态**: Phase 6 — 已实现（heuristic + DeepSeek 双 provider）
 
 **已实现:**
 - provider: heuristic_plan（关键词规则路由）
+- deepseek_provider: 基于 OpenAI SDK 的 DeepSeek API 调用（多轮 tool calling）
 - agent_runner: agent loop（计划 → 工具请求 → 等待结果 → 步骤完成 → 最终回答）
-- wrapper: RunnerLayerApi 公开接口（run + config）
+- wrapper: RunnerLayerApi 公开接口（run + config + system_prompt）
 
 **待实现:**
-- DeepSeek provider（Phase 6）
-- build_ai_tools / run_openai_chat
 - planner 增强
+- 多模型切换
 
 ## 09 EventBus
 

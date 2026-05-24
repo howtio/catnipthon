@@ -1,28 +1,30 @@
 from __future__ import annotations
 
 import json
-import time
 import uuid
 
 from src.shared.types import RunTask
 from src.layers.eventbus_09 import EventBusLayerApi, event_types
 from src.layers.tool_registry_10 import ToolRegistryLayerApi
-from src.layers.runner_08.types import StepResult, RunnerConfig
+from src.layers.runner_08.types import RunnerConfig
 from src.layers.runner_08.provider import heuristic_plan
+from src.layers.runner_08.deepseek_provider import run_deepseek
 
 
 def run_agent(
     task: RunTask,
     eventbus: EventBusLayerApi,
     registry: ToolRegistryLayerApi,
+    system_prompt: str = "",
     config: RunnerConfig | None = None,
 ) -> str:
-    """Run the agent loop with heuristic planning and tool execution.
-
-    Phase 3: heuristic provider generates a plan, each step requests a
-    tool via EventBus and waits for the result.
-    """
+    """Run the agent loop. Uses deepseek provider if configured, else heuristic."""
     cfg = config or RunnerConfig()
+
+    if cfg.provider == "deepseek":
+        return run_deepseek(task, eventbus, registry, system_prompt, cfg)
+
+    # Heuristic provider (default)
     plan = heuristic_plan(task)
 
     if not plan:
@@ -54,12 +56,7 @@ def run_agent(
                 break
         else:
             output = result_payload.get("output", "")
-            try:
-                parsed = json.loads(output)
-                message = parsed.get("message", output)
-            except (json.JSONDecodeError, TypeError):
-                message = output
-            results.append(f"[{step['tool']}] {message}")
+            results.append(f"[{step['tool']}] {output}")
 
         eventbus.publish(event_types.AGENT_STEP_FINISHED, {
             "step": step_idx,

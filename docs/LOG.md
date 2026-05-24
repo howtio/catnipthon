@@ -58,6 +58,20 @@
 
 ## 最近记录
 
+### 2026-05-24 / Phase 6 — DeepSeek 接入 + tool calling
+
+- **版本**: `0.6`
+- **改动部分**:
+  - `runner_08/deepseek_provider.py` — 基于 OpenAI SDK 的 DeepSeek API 完整多轮 tool calling 实现
+  - `runner_08/agent_runner.py` — 支持 provider 切换（cfg.provider == "deepseek" 时走 DeepSeek）
+  - `runner_08/wrapper.py` — `run()` 新增 `system_prompt` 参数并转发
+  - `harness_04/run_lifecycle.py` — 构建 full_prompt（enhanced_prompt + memory_block）传递给 runner
+  - 新增测试 7 个（无 key 回退、client 管理、API 错误、无工具作答、system_prompt 传递、max_steps 终止）
+- **验证**: mypy 90 文件 0 问题，pytest 60/60 通过
+- **提交**: （待 commit）
+- **下一步**: Phase 7 — 日志、验收、final report 增强
+
+
 ### 2026-05-24 / Phase 5 — 实现 6 个真实工具 + 3 层 Guard
 
 - **版本**: `0.5`

@@ -22,6 +22,7 @@ class RunnerLayerApi:
         self,
         task: RunTask,
         config: RunnerConfig | None = None,
+        system_prompt: str = "",
     ) -> str:
         """Execute the agent loop and return the final answer."""
-        return run_agent(task, self._eventbus, self._registry, config)
+        return run_agent(task, self._eventbus, self._registry, system_prompt, config)

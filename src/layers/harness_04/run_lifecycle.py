@@ -38,8 +38,11 @@ def run_lifecycle(
 
     eventbus.publish(event_types.PROMPT_COMPOSED, {"full_prompt_length": len(enhanced_prompt) + len(memory_block)})
 
+    # Build full prompt with context, skills, and memory
+    full_prompt = f"{enhanced_prompt}\n\n{memory_block}" if memory_block else enhanced_prompt
+
     # Run agent with real Runner
-    answer = runner.run(task, RunnerConfig(max_steps=5))
+    answer = runner.run(task, RunnerConfig(max_steps=5), system_prompt=full_prompt)
 
     run.status = "completed"
     run.final_answer = answer
