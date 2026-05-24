@@ -12,6 +12,7 @@
 | 0.0 | `docs/logs/LOG-0.0.md` |
 | 0.1 | `docs/logs/LOG-0.0.md`（已剥离） |
 | 0.2 | `docs/logs/LOG-0.0.md`（已剥离） |
+| 1.0 | `docs/logs/LOG-1.0.md` |
 
 ---
 
@@ -57,6 +58,23 @@
 ---
 
 ## 最近记录
+
+### 2026-05-24 / 1.0 MVP — 全链路可跑，通过验收任务
+
+- **版本**: `1.0`
+- **改动部分**:
+  - 修复 deepseek provider 的 tool_calls 消息顺序 bug（assistant 消息应在所有 tool 结果之前）
+  - RunnerConfig 支持 `CATNIP_RUNNER_PROVIDER` 环境变量选择 provider
+  - CLI 输出兼容 Windows GBK 编码（fallback to UTF-8）
+  - `deepseek_provider.py` 多轮 tool calling 链路完全打通
+- **验证**: mypy 91 文件 0 问题，pytest 60/60 通过
+  - 验收任务："在 workspace/demo 中创建 src/add.py，实现 add(a, b) 函数，创建测试文件，运行测试"
+  - DeepSeek 15 步循环：list_files → read_file(x6) → shell_exec(x5) → git_diff → 最终回答
+  - 全链路：Gateway→Queue→Worker→Harness→Context→Skills→Memory→Runner→EventBus→Tool Registry→Executor
+  - JSONL 事件日志完整记录 `logs/catnip.jsonl`
+- **回滚判断**: 无阻塞性错误。Windows GBK _readerthread 警告不影响功能。
+- **下一步**: 等待用户检查拍板，宣布 2.0 方向
+
 
 ### 2026-05-24 / Phase 7 — 日志、验收、final report
 

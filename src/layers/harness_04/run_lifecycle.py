@@ -68,7 +68,7 @@ def run_lifecycle(
     full_prompt = f"{enhanced_prompt}\n\n{memory_block}" if memory_block else enhanced_prompt
 
     # Run agent with real Runner
-    answer = runner.run(task, RunnerConfig(max_steps=5), system_prompt=full_prompt)
+    answer = runner.run(task, RunnerConfig(max_steps=15), system_prompt=full_prompt)
 
     # Collect run metrics from event history
     step_events = eventbus.get_history(event_types.AGENT_STEP_FINISHED)

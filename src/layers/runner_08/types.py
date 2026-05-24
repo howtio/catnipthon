@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -25,4 +26,8 @@ class RunnerConfig:
     max_steps: int = 10
     max_tool_retries: int = 2
     continue_on_tool_error: bool = False
-    provider: str = "heuristic"  # "heuristic" | "deepseek"
+    provider: str = ""  # "heuristic" | "deepseek"; empty = auto-detect
+
+    def __post_init__(self) -> None:
+        if not self.provider:
+            self.provider = os.environ.get("CATNIP_RUNNER_PROVIDER", "heuristic")

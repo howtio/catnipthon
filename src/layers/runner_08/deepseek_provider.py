@@ -88,7 +88,22 @@ def run_deepseek(
             eventbus.publish(event_types.AGENT_ANSWER_PRODUCED, {"answer": answer})
             return answer
 
-        # Process tool calls
+        # Process tool calls — append ONE assistant message, then all tool results
+        assistant_msg: dict[str, Any] = {"role": "assistant", "content": msg.content or ""}
+        assistant_msg["tool_calls"] = [
+            {
+                "id": tc.id,
+                "type": "function",
+                "function": {
+                    "name": tc.function.name,
+                    "arguments": tc.function.arguments,
+                },
+            }
+            for tc in msg.tool_calls
+        ]
+        messages.append(assistant_msg)
+
+        tool_results: list[dict[str, Any]] = []
         for tool_call in msg.tool_calls:
             fn_name = tool_call.function.name
             try:
@@ -98,22 +113,6 @@ def run_deepseek(
 
             tool_call_id = tool_call.id
 
-            # Store the assistant message with tool calls
-            assistant_msg: dict[str, Any] = {"role": "assistant", "content": msg.content or ""}
-            assistant_msg["tool_calls"] = [
-                {
-                    "id": tc.id,
-                    "type": "function",
-                    "function": {
-                        "name": tc.function.name,
-                        "arguments": tc.function.arguments,
-                    },
-                }
-                for tc in msg.tool_calls
-            ]
-            messages.append(assistant_msg)
-
-            # Request tool execution via EventBus
             eventbus.publish(event_types.TOOL_CALL_REQUESTED, {
                 "tool_call_id": tool_call_id,
                 "tool_name": fn_name,
@@ -130,7 +129,7 @@ def run_deepseek(
             else:
                 tool_result_msg = result_payload.get("output", "(no output)")
 
-            messages.append({
+            tool_results.append({
                 "role": "tool",
                 "tool_call_id": tool_call_id,
                 "content": tool_result_msg,
@@ -141,6 +140,8 @@ def run_deepseek(
                 "tool": fn_name,
                 "success": "error" not in result_payload if result_payload else False,
             })
+
+        messages.extend(tool_results)
 
         # Continue loop — model will either call more tools or produce final answer
 

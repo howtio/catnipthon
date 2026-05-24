@@ -16,7 +16,11 @@ def main() -> None:
         result = app.gateway.run_cli(sys.argv[1:])
         print()
         print("=" * 46)
-        print(result)
+        try:
+            print(result)
+        except UnicodeEncodeError:
+            safe = result.encode("utf-8", errors="replace").decode("utf-8", errors="replace")
+            print(safe)
         print("=" * 46)
     else:
         print()
