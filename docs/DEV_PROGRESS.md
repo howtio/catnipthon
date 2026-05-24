@@ -7,7 +7,7 @@
 
 ## 当前版本
 
-`0.4`（Phase 3+4：Runner + EventBus + Tool Registry + Executor + Guard 框架）
+`0.5`（Phase 5：6 个真实工具 + 3 层 Guard）
 
 ---
 
@@ -15,7 +15,7 @@
 
 | 项目 | 状态 |
 |------|------|
-| 版本 | `0.4` |
+| 版本 | `0.5` |
 | 脚手架 1.0（基础文档 + 目录） | 已完成 |
 | 脚手架 2.0（Python 工程化 + 导入策略） | 已完成 |
 | 脚手架 3.0（马拉松接力 + 防漂移 + CLI开机动画） | 已完成 |
@@ -24,17 +24,17 @@
 | Phase 2（Harness + Context + Skills + Memory + EventBus） | **已实现** ✅ |
 | Phase 3（Runner + EventBus + Tool Registry + Executor 骨架） | **已实现** ✅ |
 | Phase 4（Tool Registry 完善 + Executor Guard 框架） | **已实现** ✅ |
-| Phase 5（最小工具集） | 未开始 |
+| Phase 5（最小工具集） | **已实现** ✅ |
 | Phase 6（DeepSeek 接入 + tool calling） | 未开始 |
 | Phase 7（日志、验收、final report） | 未开始 |
-| typecheck | 通过（83 文件，0 错误） |
-| 测试 | 38 个，全部通过 |
+| typecheck | 通过（89 文件，0 错误） |
+| 测试 | 53 个，全部通过 |
 
 ---
 
 ## 进行中
 
-- Phase 5（最小工具集）
+- Phase 6（DeepSeek 接入 + tool calling）
 
 ---
 

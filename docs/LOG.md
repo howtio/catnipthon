@@ -58,6 +58,21 @@
 
 ## 最近记录
 
+### 2026-05-24 / Phase 5 — 实现 6 个真实工具 + 3 层 Guard
+
+- **版本**: `0.5`
+- **改动部分**:
+  - `executor_11/tools.py` — 6 个真实工具实现：list_files（目录列表）、read_file（文件读取）、write_file（文件写入）、patch_file（字符串替换）、shell_exec（shell 命令执行）、git_diff（git diff）
+  - `executor_11/policy/permission_guard.py` — low/medium/high 三级权限
+  - `executor_11/policy/path_guard.py` — workspace 边界检查
+  - `executor_11/policy/command_guard.py` — 白名单 + 危险命令阻止
+  - `executor_11/guard.py` — Guard 统一入口（自动识别工具类别运行对应 guard）
+  - `executor_11/execute_tool.py` — 更新为真实执行 + guard 检查
+- **验证**: mypy 89 文件 0 问题，pytest 53/53 通过，冒烟测试通过（真实 list_files + read_file 执行成功）
+- **提交**: TBD
+- **下一步**: Phase 6 — DeepSeek 接入 + Tool Calling
+
+
 ### 2026-05-24 / Phase 3+4 — Runner + EventBus + Tool Registry + Executor 骨架
 
 - **版本**: `0.4`

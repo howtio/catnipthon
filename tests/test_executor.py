@@ -29,7 +29,7 @@ def test_executor_sync_call() -> None:
 
     result = executor.execute_sync("list_files", {"path": "."})
     assert result.success is True
-    assert "list_files" in result.output
+    assert "src" in result.output
 
 
 def test_executor_unknown_tool() -> None:

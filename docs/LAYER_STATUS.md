@@ -49,13 +49,13 @@
 
 ## 04 Harness
 
-**状态**: Phase 2 — 已实现（Run 生命周期 + Context→Skills→Memory→Runner 串联）
+**状态**: Phase 5 — 已实现（Run 生命周期 + Context→Skills→Memory→Runner→Executor 全链路）
 
 **已实现:**
 - create_run: UUID + RunInfo 创建
-- run_lifecycle: 顺序调用 Context→Skills→Memory→Runner（mock）
+- run_lifecycle: 顺序调用 Context→Skills→Memory→Runner（含真实 agent loop）
 - build_final_report: FinalReport 构建 + 格式化
-- wrapper: HarnessLayerApi 公开接口
+- wrapper: HarnessLayerApi 公开接口（注入所有依赖）
 
 **待实现:**
 - max_step_policy
@@ -145,24 +145,16 @@
 
 ## 11 Executor
 
-**状态**: Phase 3 — 骨架实现（订阅工具事件 + 模拟执行 + 发布结果）
+**状态**: Phase 5 — 已实现（6 真实工具 + 3 层 Guard + 统一入口）
 
 **已实现:**
-- execute_tool: 模拟执行入口（Phase 3 mock）
-- wrapper: ExecutorLayerApi（自动订阅 tool.call.requested + execute_sync）
-- ToolCallRequest / ToolResult 类型
-
-**待实现:**
-- 三层 Guard（permissionGuard / pathGuard / commandGuard）— Phase 4
-- 真实工具实现 — Phase 5
-
-## 10 Tool Registry
-
-**状态**: 未开始（仅 README + __init__）
-
-## 11 Executor
-
-**状态**: 未开始（仅 README + __init__）
+- tools.py: 6 个真实工具（list_files / read_file / write_file / patch_file / shell_exec / git_diff）
+- guard.py: Guard 统一入口（自动识别工具类别运行对应 guard）
+- policy/permission_guard.py: low/medium/high 三级权限检查
+- policy/path_guard.py: workspace 路径边界检查
+- policy/command_guard.py: 危险命令阻止 + 白名单放行
+- execute_tool.py: 真实工具执行（guard → 执行 → 结果返回）
+- wrapper: ExecutorLayerApi（自动订阅 + sync 执行）
 
 ## Shared
 
