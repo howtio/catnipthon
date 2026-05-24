@@ -293,18 +293,20 @@ def open_browser(url: str) -> str:
             return False
 
     import concurrent.futures
-    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as exe:
+    exe = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+    try:
         fut = exe.submit(_do_open, url)
         try:
             result = fut.result(timeout=5.0)
-            # On Windows, os.startfile() returns None (falsy but not failure)
             if result is not False:
                 return f"Opened browser: {url}. Continue with the next step."
-            return f"(browser open attempted — if nothing appeared, open {url} manually)"
+            return "(browser open attempted \u2014 if nothing appeared, open {url} manually)"
         except concurrent.futures.TimeoutError:
             return f"Opened browser (detached): {url}"
         except Exception as e:
             return f"Error: {e}"
+    finally:
+        exe.shutdown(wait=False)  # never block on shutdown
 
 
 def file_search(pattern: str, content: str = "", max_results: int = 20) -> str:
