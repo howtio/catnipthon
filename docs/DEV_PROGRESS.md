@@ -7,7 +7,7 @@
 
 ## 当前版本
 
-`0.6`（Phase 6：DeepSeek 接入 + tool calling）
+`0.7`（Phase 7：日志、验收、final report）
 
 ---
 
@@ -15,7 +15,7 @@
 
 | 项目 | 状态 |
 |------|------|
-| 版本 | `0.6` |
+| 版本 | `0.7` |
 | 脚手架 1.0（基础文档 + 目录） | 已完成 |
 | 脚手架 2.0（Python 工程化 + 导入策略） | 已完成 |
 | 脚手架 3.0（马拉松接力 + 防漂移 + CLI开机动画） | 已完成 |
@@ -26,8 +26,8 @@
 | Phase 4（Tool Registry 完善 + Executor Guard 框架） | **已实现** ✅ |
 | Phase 5（最小工具集） | **已实现** ✅ |
 | Phase 6（DeepSeek 接入 + tool calling） | **已实现** ✅ |
-| Phase 7（日志、验收、final report） | 未开始 |
-| typecheck | 通过（90 文件，0 错误） |
+| Phase 7（日志、验收、final report） | **已实现** ✅ |
+| typecheck | 通过（91 文件，0 错误） |
 | 测试 | 60 个，全部通过 |
 
 ---

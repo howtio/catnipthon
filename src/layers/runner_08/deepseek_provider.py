@@ -52,6 +52,12 @@ def run_deepseek(
     step_count = 0
     max_steps = cfg.max_steps
 
+    eventbus.publish(event_types.AGENT_PLAN_GENERATED, {
+        "plan": [],
+        "step_count": 0,
+        "provider": "deepseek",
+    })
+
     while step_count < max_steps:
         step_count += 1
 
@@ -75,6 +81,10 @@ def run_deepseek(
         if not tools or not msg.tool_calls:
             # Final answer
             answer = msg.content or "(no response)"
+            eventbus.publish(event_types.AGENT_REASONING_SUMMARY, {
+                "steps_completed": step_count,
+                "final_reasoning": answer[:500],
+            })
             eventbus.publish(event_types.AGENT_ANSWER_PRODUCED, {"answer": answer})
             return answer
 
@@ -134,4 +144,10 @@ def run_deepseek(
 
         # Continue loop — model will either call more tools or produce final answer
 
-    return f"[deepseek] Reached max steps ({max_steps}) without final answer."
+    msg = f"[deepseek] Reached max steps ({max_steps}) without final answer."
+    eventbus.publish(event_types.AGENT_REASONING_SUMMARY, {
+        "steps_completed": step_count,
+        "final_reasoning": msg,
+    })
+    eventbus.publish(event_types.AGENT_ANSWER_PRODUCED, {"answer": msg})
+    return msg

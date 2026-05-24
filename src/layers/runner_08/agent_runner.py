@@ -28,7 +28,14 @@ def run_agent(
     plan = heuristic_plan(task)
 
     if not plan:
-        return f"[heuristic] No plan generated for: {task.user_message}"
+        msg = f"[heuristic] No plan generated for: {task.user_message}"
+        eventbus.publish(event_types.AGENT_ANSWER_PRODUCED, {"answer": msg})
+        return msg
+
+    eventbus.publish(event_types.AGENT_PLAN_GENERATED, {
+        "plan": plan,
+        "step_count": len(plan),
+    })
 
     results: list[str] = []
 
@@ -65,6 +72,12 @@ def run_agent(
         })
 
     final_answer = "\n".join(results)
+
+    eventbus.publish(event_types.AGENT_REASONING_SUMMARY, {
+        "steps_completed": len(results),
+        "tools_used": list(dict.fromkeys(r.split("]")[0].lstrip("[") if "]" in r else "" for r in results)),
+    })
+
     eventbus.publish(event_types.AGENT_ANSWER_PRODUCED, {
         "answer": final_answer,
     })

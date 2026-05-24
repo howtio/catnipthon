@@ -49,12 +49,13 @@
 
 ## 04 Harness
 
-**状态**: Phase 5 — 已实现（Run 生命周期 + Context→Skills→Memory→Runner→Executor 全链路）
+**状态**: Phase 7 — 已实现（完整 run 生命周期 + 指标收集 + JSONL 日志）
 
 **已实现:**
 - create_run: UUID + RunInfo 创建
 - run_lifecycle: 顺序调用 Context→Skills→Memory→Runner（含真实 agent loop）
-- build_final_report: FinalReport 构建 + 格式化
+- run_lifecycle: 自动收集 tool_summary、step count、modified_files
+- build_final_report: FinalReport 构建 + 格式化（含工具计数、修改文件列表）
 - wrapper: HarnessLayerApi 公开接口（注入所有依赖）
 
 **待实现:**
@@ -167,3 +168,4 @@
 - utils: create_id
 - version: 版本号从 pyproject.toml 单一真相源读取
 - cli: catnip 品牌 CLI 开机动画（TITLE/SUBTITLE/LAYERS 可覆盖）
+- jsonl_logger: EventBus 全事件旁路写入 logs/catnip.jsonl

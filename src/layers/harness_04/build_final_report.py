@@ -24,10 +24,11 @@ def format_final_report(report: FinalReport) -> str:
         f"Run ID: {report.run_id}",
         f"Steps: {report.steps_used}",
         f"Duration: {report.duration_ms:.0f}ms",
-        f"",
-        f"## Result",
-        f"{report.final_answer}",
     ]
+    if report.tool_summary:
+        tools_str = ", ".join(f"{k} ({v})" for k, v in report.tool_summary.items())
+        lines.append(f"Tools used: {tools_str}")
+    lines.extend(["", "## Result", f"{report.final_answer}"])
     if report.modified_files:
         lines.extend(["", "## Modified Files"])
         for f in report.modified_files:

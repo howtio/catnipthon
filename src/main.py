@@ -14,7 +14,10 @@ def main() -> None:
 
     if len(sys.argv) > 1:
         result = app.gateway.run_cli(sys.argv[1:])
-        print_result_ok("result", result)
+        print()
+        print("=" * 46)
+        print(result)
+        print("=" * 46)
     else:
         print()
         print("  Usage: python -m src.main \"your message\"")

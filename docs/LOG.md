@@ -58,6 +58,21 @@
 
 ## 最近记录
 
+### 2026-05-24 / Phase 7 — 日志、验收、final report
+
+- **版本**: `0.7`
+- **改动部分**:
+  - `shared/jsonl_logger.py` — 新增 JSONL 事件日志（所有 EventBus 事件旁路写入 `logs/catnip.jsonl`）
+  - `runner_08/agent_runner.py` — 新增发布 AGENT_PLAN_GENERATED / AGENT_REASONING_SUMMARY 事件
+  - `runner_08/deepseek_provider.py` — 同上，DeepSeek provider 也发布规划/推理事件
+  - `harness_04/run_lifecycle.py` — 自动收集 tool_summary（工具计数）、modified_files（写文件列表）、精确 step count
+  - `harness_04/build_final_report.py` — 输出包含工具摘要行（如 "Tools used: list_files (1), git_diff (1)"）
+  - `bootstrap.py` — 附加 JSONL logger 到 EventBus
+- **验证**: mypy 91 文件 0 问题，pytest 60/60 通过，冒烟测试通过（JSONL 14 条事件记录完整）
+- **提交**: （待 commit）
+- **下一步**: 1.0 MVP — 验收任务跑通
+
+
 ### 2026-05-24 / Phase 6 — DeepSeek 接入 + tool calling
 
 - **版本**: `0.6`

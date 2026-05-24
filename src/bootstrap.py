@@ -6,6 +6,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 
 from src.shared.types import RunTask
+from src.shared.jsonl_logger import attach_jsonl_logger
 from src.layers.gateway_01 import GatewayLayerApi, GatewayConfig
 from src.layers.queue_02 import QueueLayerApi
 from src.layers.worker_03 import WorkerLayerApi
@@ -39,6 +40,10 @@ def bootstrap() -> App:
     # No-dependency layers (instantiation order doesn't matter within this group)
     queue = QueueLayerApi()
     eventbus = EventBusLayerApi()
+
+    # Attach JSONL event logging (writes all events to logs/catnip.jsonl)
+    attach_jsonl_logger(eventbus)
+
     context = ContextLayerApi()
     skills = SkillsLayerApi()
     memory = MemoryLayerApi()
