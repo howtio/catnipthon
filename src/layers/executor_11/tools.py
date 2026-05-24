@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import os
-import re
 import subprocess
 import webbrowser
 from pathlib import Path
@@ -146,18 +145,20 @@ def git_diff() -> str:
 
 
 def _fetch_url(url: str, timeout_s: int = 15) -> str:
-    """Fetch URL content via httpx. Returns text (HTML stripped)."""
+    """Fetch URL content via httpx. Returns clean text (HTML stripped via BeautifulSoup)."""
     try:
         import httpx
+        from bs4 import BeautifulSoup
     except ImportError:
-        return "Error: httpx not available"
+        return "Error: httpx or beautifulsoup4 not available"
     try:
         with httpx.Client(timeout=timeout_s, follow_redirects=True) as client:
             resp = client.get(url, headers={"User-Agent": "Mozilla/5.0"})
             resp.raise_for_status()
-            text = resp.text
-            text = re.sub(r"<[^>]+>", " ", text)
-            text = re.sub(r"\s+", " ", text).strip()
+            soup = BeautifulSoup(resp.text, "html.parser")
+            for tag in soup(["script", "style"]):
+                tag.decompose()
+            text = soup.get_text(separator=" ", strip=True)
             if len(text) > 10000:
                 text = text[:10000] + "\n... [truncated to 10KB]"
             return text
@@ -177,44 +178,31 @@ def web_fetch(url: str) -> str:
 
 
 def web_search(query: str, max_results: int = 5) -> str:
-    """Search the web via DuckDuckGo HTML interface."""
-    import urllib.parse
-
+    """Search the web via DuckDuckGo. Returns top result snippets."""
     try:
-        import httpx
+        from duckduckgo_search import DDGS
     except ImportError:
-        return "Error: httpx not available"
+        return "Error: duckduckgo_search not available"
 
     max_results = max(1, min(max_results, 10))
-    encoded = urllib.parse.quote(query)
-    url = f"https://html.duckduckgo.com/html/?q={encoded}"
-
     try:
-        with httpx.Client(timeout=15, follow_redirects=True) as client:
-            resp = client.get(url, headers={"User-Agent": "Mozilla/5.0"})
-            resp.raise_for_status()
-            html = resp.text
+        with DDGS() as ddgs:
+            raw = list(ddgs.text(query, max_results=max_results))
     except Exception as e:
         return f"Error: search failed: {e}"
 
-    results: list[str] = []
-    link_pat = re.compile(r'class="result__a"[^>]*href="(https?://[^"]+)"[^>]*>(.*?)</a>')
-    snippet_pat = re.compile(r'class="result__snippet"[^>]*>(.*?)</(?:a|span)>', re.DOTALL)
-
-    links = link_pat.findall(html)
-    snippets = snippet_pat.findall(html)
-
-    for i, (href, title_text) in enumerate(links[:max_results]):
-        title = re.sub(r"<[^>]+>", "", title_text).strip()
-        snippet = ""
-        if i < len(snippets):
-            snippet = re.sub(r"<[^>]+>", "", snippets[i]).strip()
-        results.append(f"{i+1}. {title}\n   {href}")
-        if snippet:
-            results.append(f"   {snippet}")
-
-    if not results:
+    if not raw:
         return f"(no results for: {query})"
+
+    results: list[str] = []
+    for i, r in enumerate(raw):
+        title = r.get("title", "").strip()
+        href = r.get("href", "").strip()
+        body = r.get("body", "").strip()
+        results.append(f"{i+1}. {title}")
+        results.append(f"   {href}")
+        if body:
+            results.append(f"   {body}")
     return "\n".join(results)
 
 
@@ -253,7 +241,7 @@ def open_browser(url: str) -> str:
             result = fut.result(timeout=5.0)
             # On Windows, os.startfile() returns None (falsy but not failure)
             if result is not False:
-                return f"Opened browser: {url}"
+                return f"Opened browser: {url}. Continue with the next step."
             return f"(browser open attempted — if nothing appeared, open {url} manually)"
         except concurrent.futures.TimeoutError:
             return f"Opened browser (detached): {url}"

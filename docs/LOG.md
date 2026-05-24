@@ -60,6 +60,32 @@
 
 ## 最近记录
 
+### 2026-05-24 / v5.0 — 防卡死 + Web 搜索增强 + 全流程优化
+
+- **版本**: `5.0`
+- **改动部分**:
+  - **流式超时**（根治卡死）:
+    - `deepseek_provider.py` — `client.chat.completions.create()` 加 `timeout=60`，流停滞超过 60s 抛 APITimeout，不再永久挂起
+  - **Web 搜索替换为 duckduckgo_search 库**:
+    - 移除脆弱的手动 HTML 正则解析（`class="result__a"` 等）
+    - `web_search` 改用 `duckduckgo_search.DDGS.text()`，更稳定、更干净
+  - **Web 抓取替换为 BeautifulSoup**:
+    - `_fetch_url` 用 `BeautifulSoup.get_text()` 代替 `re.sub(r"<[^>]+>")`，正确移除 script/style
+  - **open_browser 结果引导**:
+    - 成功消息追加 "Continue with the next step."，agent 知道要继续
+  - **max_steps 提升**: 10 → 20（默认），15 → 20（run_lifecycle）
+  - **依赖加固**: httpx / beautifulsoup4 / duckduckgo-search 正式加入 pyproject.toml
+- **修改文件**:
+  - `pyproject.toml` — 版本 5.0 + 新增依赖
+  - `src/layers/runner_08/deepseek_provider.py` — timeout=60
+  - `src/layers/executor_11/tools.py` — 重写 web_search/_fetch_url/open_browser，移除 import re
+  - `src/layers/runner_08/types.py` — max_steps 10→20
+  - `src/layers/harness_04/run_lifecycle.py` — max_steps 15→20
+  - `tests/test_deepseek_provider.py` — timeout 断言
+- **验证**: mypy 95 文件 0 错误，pytest 70/70 通过
+- **提交**: （待 commit）
+- **下一步**: 等待用户反馈
+
 ### 2026-05-24 / v4.0 — 工具增强 + 会话记忆 + Token 优化
 
 - **版本**: `4.0`

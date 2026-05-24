@@ -197,6 +197,7 @@ def run_deepseek(
                 "max_tokens": 8192,
                 "stream": True,
                 "stream_options": {"include_usage": True},
+                "timeout": 60,  # prevents infinite stall on stream hang
             }
             if tools:
                 kwargs["tools"] = tools

@@ -7,7 +7,7 @@
 
 ## 当前版本
 
-`4.0`（工具增强 + 会话记忆 + Token 优化）
+`5.0`（防卡死 + Web 搜索增强 + 全流程优化）
 
 ---
 
@@ -15,7 +15,7 @@
 
 | 项目 | 状态 |
 |------|------|
-| 版本 | `4.0` |
+| 版本 | `5.0` |
 | 脚手架 1.0（基础文档 + 目录） | 已完成 |
 | 脚手架 2.0（Python 工程化 + 导入策略） | 已完成 |
 | 脚手架 3.0（马拉松接力 + 防漂移 + CLI开机动画） | 已完成 |
@@ -33,8 +33,11 @@
 | 会话记忆（SessionMemory，进程内跟踪） | **已实现** ✅ |
 | Token 优化（紧凑描述、历史压缩、结果截断） | **已实现** ✅ |
 | URL 安全守卫（SSRF 防护） | **已实现** ✅ |
+| v5.0 防卡死（流式超时 60s） | **已实现** ✅ |
+| v5.0 Web 搜索增强（duckduckgo_search + BeautifulSoup） | **已实现** ✅ |
+| v5.0 open_browser 结果引导 + max_steps 提升 | **已实现** ✅ |
 | typecheck | 通过（95 文件，0 错误） |
-| 测试 | 69 个，全部通过 |
+| 测试 | 70 个，全部通过 |
 
 ---
 
@@ -72,3 +75,10 @@
   - 历史压缩：`_compress_history()` 旧 tool 结果截断为 500 字符
   - 结果截断：`_truncate()` 工具结果限制 2000 字符
   - Session 上下文自动注入 system prompt
+- v5.0 防卡死 + Web 增强（2026-05-24）：
+  - 流式超时 60s：`client.chat.completions.create(timeout=60)`，流停滞抛 APITimeout
+  - web_search 改用 `duckduckgo_search.DDGS` 库（取代脆弱 HTML 正则）
+  - _fetch_url 改用 `BeautifulSoup` 解析（正确移除 script/style，干净文本）
+  - open_browser 引导 agent 继续：消息追加 "Continue with the next step."
+  - max_steps 10→20（默认），15→20（run_lifecycle）
+  - httpx / beautifulsoup4 / duckduckgo-search 正式加入 pyproject.toml

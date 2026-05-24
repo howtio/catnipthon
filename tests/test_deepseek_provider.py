@@ -138,6 +138,7 @@ def test_system_prompt_included() -> None:
     assert messages[1]["content"] == "hello"
     # streaming mode
     assert call_kwargs.get("stream") is True
+    assert call_kwargs.get("timeout") == 60
 
 
 def test_max_steps_exceeded() -> None:

@@ -91,7 +91,7 @@ def run_lifecycle(
     # Build full prompt with context, skills, and memory
     full_prompt = f"{enhanced_prompt}\n\n{combined_memory}" if combined_memory else enhanced_prompt
 
-    runner_cfg = RunnerConfig(max_steps=15)
+    runner_cfg = RunnerConfig(max_steps=20)
 
     # Run agent with real Runner
     answer = runner.run(task, runner_cfg, system_prompt=full_prompt,

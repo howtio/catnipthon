@@ -23,7 +23,7 @@ class StepResult:
 class RunnerConfig:
     """Configuration for the agent runner."""
 
-    max_steps: int = 10
+    max_steps: int = 20
     max_tool_retries: int = 2
     continue_on_tool_error: bool = False
     provider: str = ""  # "heuristic" | "deepseek"; empty = auto-detect
