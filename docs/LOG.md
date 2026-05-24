@@ -68,7 +68,7 @@
   - `main.py` — 更新入口：接收 CLI 参数 → 走完整 pipeline
   - 新增测试 `tests/test_queue.py` — 4 个测试
 - **验证**: mypy 39 文件 0 问题，pytest 4/4 通过，冒烟测试通过
-- **提交**: TBD
+- **提交**: 5736ec6
 - **下一步**: Phase 2 — Harness + Context + Skills + Memory
 
 
