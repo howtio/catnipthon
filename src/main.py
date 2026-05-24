@@ -1,4 +1,4 @@
-"""catnip-agent — CLI 2.0: batch mode + interactive REPL."""
+"""catnip-agent — Claude Code-style CLI: batch mode + interactive REPL."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ import os
 import sys
 import time
 
-from src.shared.cli import H_LINE, print_header, print_session_summary
+from src.shared.cli import H_LINE, print_header, print_divider, print_summary_claude
 from src.shared.interactive import run_interactive
 from src.bootstrap import bootstrap
 
@@ -19,16 +19,15 @@ def main() -> None:
         # Batch mode: run a single task
         user_msg = " ".join(sys.argv[1:])
         provider = os.environ.get("CATNIP_RUNNER_PROVIDER", "deepseek")
-        print()
         print(f"  Task: {user_msg[:60]}{'...' if len(user_msg) > 60 else ''}")
         print(f"  Mode: batch  |  Provider: {provider}")
-        print(H_LINE)
+        print_divider()
 
         start = time.time()
         try:
             result = app.gateway.run_cli(sys.argv[1:])
         except Exception as e:
-            print(f"\n  [!] Error: {e}")
+            print(f"  [!] Error: {e}")
             sys.exit(1)
 
         duration_ms = (time.time() - start) * 1000
@@ -49,15 +48,14 @@ def main() -> None:
             if tn:
                 tool_summary[tn] = tool_summary.get(tn, 0) + 1
 
-        print_session_summary(
-            run_id="",
+        print_summary_claude(
             steps=steps_used or 1,
             duration_ms=duration_ms,
             token_usage=token_usage,
-            tool_summary=tool_summary,
+            tool_counts=tool_summary,
         )
 
-        print(f"\n  {H_LINE}")
+        print_divider()
         try:
             print(result.strip())
         except UnicodeEncodeError:
@@ -65,7 +63,7 @@ def main() -> None:
                 sys.stdout.encoding or "utf-8", errors="replace"
             )
             print(safe)
-        print(H_LINE)
+        print_divider()
     else:
         # Interactive mode
         run_interactive(app)

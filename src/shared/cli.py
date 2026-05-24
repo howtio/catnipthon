@@ -1,13 +1,12 @@
-"""Catnip CLI rendering — reusable scaffolding component with ANSI color support.
+"""Catnip CLI rendering — Claude Code-style clean output.
 
-Import `print_header`, `print_step_header`, `print_step_result`,
-`print_session_summary` from here.
+Import `print_header`, `print_step_claude`, `print_result_claude`,
+`print_summary_claude`, `print_thinking` from here.
 """
 
 from __future__ import annotations
 
 import os
-import random
 import sys
 
 from src.shared.version import VERSION_TAG
@@ -20,42 +19,24 @@ TITLE = "catnip agent"
 SUBTITLE = "11-Layer Coding Agent Runtime"
 
 LAYERS = (
-    "gateway_01  \u2192  queue_02    \u2192  worker_03\n"
-    "harness_04  \u2192  context_05  \u2192  skills_06\n"
-    "memory_07   \u2192  runner_08   \u2192  eventbus_09\n"
-    "tool_registry_10 \u2192 executor_11"
+    "gateway_01 -> queue_02 -> worker_03\n"
+    "harness_04 -> context_05 -> skills_06\n"
+    "memory_07 -> runner_08 -> eventbus_09\n"
+    "tool_registry_10 -> executor_11"
 )
 
 # ── ANSI color support ──────────────────────────────────────────────────
 
-_COLORS = [92, 93, 94, 95, 96, 32, 33, 34, 35, 36]
 _RESET = "\033[0m"
 _HAS_COLOR = sys.stdout.isatty() and os.environ.get("TERM") != "dumb"
 
-# Per-layer fixed colors for visual layer identification
-LAYER_COLORS: dict[str, int] = {
-    "gateway": 95,
-    "queue": 94,
-    "worker": 93,
-    "harness": 92,
-    "context": 96,
-    "skills": 35,
-    "memory": 34,
-    "runner": 33,
-    "eventbus": 32,
-    "tool_registry": 36,
-    "executor": 91,
-}
-
-
-def layer_color(layer_name: str) -> int:
-    """Return the fixed color code for a given layer name."""
-    return LAYER_COLORS.get(layer_name, 37)
-
-
-def c_layer(text: str, layer_name: str) -> str:
-    """Wrap *text* in the fixed color for *layer_name*."""
-    return _c(text, layer_color(layer_name))
+# Fixed professional palette (Claude Code style)
+INFO = 37     # white
+OK = 32       # green
+WARN = 33     # yellow
+ERROR = 91    # red
+HIGHLIGHT = 96  # cyan (tool names, highlights)
+DIM = 90      # gray (secondary info)
 
 
 def _enable_ansi() -> None:
@@ -63,31 +44,31 @@ def _enable_ansi() -> None:
     if os.name == "nt":
         try:
             import ctypes
-
             kernel32 = ctypes.windll.kernel32
             kernel32.SetConsoleMode(kernel32.GetStdHandle(-11), 7)
         except Exception:
             pass
 
 
-def _c(text: str, color_code: int | None = None) -> str:
+def _c(text: str, color_code: int) -> str:
     """Wrap text in ANSI color if terminal supports it."""
     if not _HAS_COLOR:
         return text
-    if color_code is None:
-        color_code = random.choice(_COLORS)
     return f"\033[{color_code}m{text}{_RESET}"
-
-
-def _pick() -> int:
-    """Return a random color code from the palette."""
-    return random.choice(_COLORS)
 
 
 def _strip_ansi(text: str) -> str:
     """Remove ANSI codes for width calculation."""
     import re
     return re.sub(r"\033\[[0-9;]*m", "", text)
+
+
+# ── Symbol constants (Claude Code style) ───────────────────────────────
+
+SYM_SUB = "\u25c7"     # ◇
+SYM_BRANCH = "\u2503"  # ┃
+SYM_OK = "\u2713"      # ✓
+SYM_FAIL = "\u2717"    # ✗
 
 
 # ── Pink / 256-color support ─────────────────────────────────────────────
@@ -126,112 +107,105 @@ def _pad_center(text: str, width: int = W) -> str:
     return text.center(width)
 
 
-BANNER = f"""\u255e{'═' * W}\u255d
-\u2551{_pad_center('')}\u2551
-\u2551{_pad_center(TITLE + '  ' + VERSION_TAG)}\u2551
-\u2551{_pad_center(SUBTITLE)}\u2551
-\u2551{_pad_center('')}\u2551
-\u2560{'═' * W}\u2563
-\u2551{'Layers'.center(W)}\u2551
-\u2560{'═' * W}\u2563"""
-
-BANNER_BOTTOM = f"\u255a{'═' * W}\u255d"
-
-
-def _layer_lines() -> list[str]:
-    """Return layer lines with each layer name colored by its fixed layer color."""
-    result: list[str] = []
-    for raw_line in LAYERS.split("\n"):
-        colored_parts: list[str] = []
-        for token in raw_line.split():
-            # Map token (e.g. "gateway_01") to its base layer name
-            base = token.split("_")[0] if "_" in token else token
-            if base in LAYER_COLORS:
-                colored_parts.append(c_layer(token, base))
-            else:
-                colored_parts.append(token)
-        colored_line = " ".join(colored_parts)
-        result.append("\u2551" + colored_line.center(W) + "\u2551")
-    return result
+BANNER = f"""{'=' * W}
+{_pad_center(TITLE + '  ' + VERSION_TAG)}
+{_pad_center(SUBTITLE)}
+{'=' * W}"""
 
 
 def print_header() -> None:
+    """Print pink boot animation with cat and version."""
+    print()
     print(_pink(CAT))
     print(_pink(BANNER))
-    for line in _layer_lines():
-        print(_pink(line))
-    print(_pink(BANNER_BOTTOM))
+    for line in LAYERS.split("\n"):
+        print(_pink("  " + line.center(W - 2)))
+    print()
 
 
-# ── Public helpers ──────────────────────────────────────────────────────
+# ── Divider ─────────────────────────────────────────────────────────────
 
 
-def print_task_bar(user_message: str) -> None:
-    print(f"\n{H_LINE}")
-    print(f"  Task: {user_message}")
-    print(H_LINE)
-
-
-def print_result_ok(task_id: str, result: str) -> None:
-    print(f"\n  [OK] Task {task_id} completed")
-    print(H_LINE)
-    print(result)
-    print(H_LINE)
-
-
-def print_result_fail(task_id: str, error: str | None) -> None:
-    print(f"\n  [!] Task {task_id} failed")
-    if error:
-        print(f"  Error: {error}")
-
-
-def print_step_header(step_num: int, total: int, tool_name: str) -> None:
-    """Print step header with runner-layer colored step number and tool name."""
-    c_runner = layer_color("runner")
-    c2 = _pick()
-    sep = "--" if os.name == "nt" else "\u2500\u2500"
-    s = f"\n  {_c(sep, c_runner)} {_c(f'Step {step_num}/{total}', c_runner)} {_c(sep * 20, c_runner)}"
-    s += f"\n  {_c('Tool:', c2)}    {_c(tool_name, c2)}"
-    s += f"\n  {_c('Status:', 33)}  {_c('Running...', 33)}"
-    print(s)
-
-
-def print_step_result(success: bool, duration_s: float, tokens: int = 0) -> None:
-    """Update step completion line with green/red status."""
-    if success:
-        status = _c("[ok]", 92)
+def print_divider(title: str = "") -> None:
+    """Print a thin divider line with optional centered title."""
+    if title:
+        side_len = (W - len(title) - 2) // 2
+        line = f"{'─' * side_len} {title} {'─' * side_len}"
+        if len(line) < W:
+            line = "─" * W
     else:
-        status = _c("[!!]", 91)
-    token_str = ", " + _c(f"{tokens} tokens", 96) if tokens else ""
-    duration_str = _c(f"{duration_s:.1f}s", 93)
-    print(f"\r  Status:  {status}  ({duration_str}{token_str})")
+        line = "─" * W
+    print(f"  {_c(line, DIM)}")
 
 
-def print_session_summary(
-    run_id: str,
+# ── Claude Code-style output functions ──────────────────────────────────
+
+
+def print_step_claude(step_num: int, tool_name: str, args_summary: str = "") -> None:
+    """Print a Claude Code-style step header.
+
+    Format:
+      ◇ Tool: read_file
+        ┃ path: src/main.py
+    """
+    print(f"\n  {SYM_SUB} {_c('Tool:', DIM)} {_c(tool_name, HIGHLIGHT)}")
+    if args_summary:
+        print(f"  {SYM_BRANCH} {_c(args_summary, DIM)}")
+
+
+def print_result_claude(success: bool, duration_s: float, tokens: int = 0) -> None:
+    """Print step completion result (overwrites status line).
+
+    Format:  ◇ ✓ (1.2s · 450t)
+             ◇ ✗ Error details
+    """
+    token_str = f" \u00b7 {tokens}t" if tokens else ""
+    if success:
+        status = _c(f"{SYM_OK} ({duration_s:.1f}s{token_str})", OK)
+    else:
+        status = _c(f"{SYM_FAIL} ({duration_s:.1f}s{token_str})", ERROR)
+    print(f"\r  {SYM_SUB} {status}")
+
+
+def print_summary_claude(
     steps: int,
     duration_ms: float,
     token_usage: dict[str, int],
-    tool_summary: dict[str, int],
+    tool_counts: dict[str, int],
 ) -> None:
-    """Print a colored session summary box using harness-layer colors."""
-    c = layer_color("harness")
-    line = _c("=" * W, c)
-    print(f"\n{line}")
-    print(f"  {_c('Run ID:', c)}    {run_id}")
-    print(f"  {_c('Steps:', c)}     {steps}")
-    print(f"  {_c('Duration:', c)}  {duration_ms:.0f}ms")
-    if token_usage.get("total_tokens", 0) > 0:
-        tu = token_usage
-        t_total = f"{tu['total_tokens']:,}"
-        t_prompt = f"{tu['prompt_tokens']:,}"
-        t_comp = f"{tu['completion_tokens']:,}"
-        print(f"  {_c('Tokens:', c)}    {_c(t_total, 93)} "
-              f"(prompt: {_c(t_prompt, 94)} "
-              f"+ completion: {_c(t_comp, 94)})")
-    if tool_summary:
-        print()
-        for tool_name, count in sorted(tool_summary.items()):
-            plural = "call" if count == 1 else "calls"
-            print(f"    {_c(tool_name, _pick()):<20} {_c(str(count), _pick())} {plural}")
-    print(line)
+    """Print a Claude Code-style session summary.
+
+    Format:
+      ──────────────── Summary ────────────────
+      ◇ 3 steps · 5.2s · 1,340 tokens
+      ◇ Tools: read_file (2), list_files (1)
+    """
+    print()
+    print_divider("Summary")
+    duration_s = duration_ms / 1000
+    total_tokens = token_usage.get("total_tokens", 0)
+    parts = [f"{steps} step{'s' if steps != 1 else ''}",
+             f"{duration_s:.1f}s"]
+    if total_tokens:
+        parts.append(f"{total_tokens:,} tokens")
+    print(f"  {SYM_SUB} {' \u00b7 '.join(parts)}")
+    if tool_counts:
+        tool_list = ", ".join(f"{name} ({count})" for name, count in sorted(tool_counts.items()))
+        print(f"  {SYM_SUB} {_c('Tools:', DIM)} {tool_list}")
+
+
+def print_thinking(text: str) -> None:
+    """Print Claude Code-style thinking/reasoning text.
+
+    Prefix with '> ' in dim color, truncated to ~80 chars.
+    """
+    if not text:
+        return
+    line = text[:80].replace("\n", " ")
+    print(f"\r  {_c(f'> {line}', DIM)}")
+
+
+def print_user_message(msg: str) -> None:
+    """Print user message in Claude Code style with '>' prompt prefix."""
+    print(f"\n  > {msg}")
+    print_divider()

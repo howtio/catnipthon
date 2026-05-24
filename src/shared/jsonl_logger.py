@@ -22,8 +22,6 @@ _ALL_EVENTS = [
     event_types.WORKER_HEARTBEAT,
     event_types.QUEUE_HEARTBEAT,
     event_types.LLM_USAGE,
-    event_types.AGENT_ASKING_USER,
-    event_types.AGENT_USER_RESPONSE,
     event_types.PROMPT_COMPOSED,
 ]
 

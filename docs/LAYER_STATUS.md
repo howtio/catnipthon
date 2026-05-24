@@ -152,5 +152,6 @@
 - logger: get_logger（控制台日志）
 - utils: create_id
 - version: 版本号从 pyproject.toml 单一真相源读取
-- cli: catnip 品牌 CLI 开机动画（TITLE/SUBTITLE/LAYERS 可覆盖）+ LAYER_COLORS 每层固定色 + 粉红开机动画（_pink）
+- cli: Claude Code 风格 CLI（print_step_claude / print_result_claude / print_summary_claude / print_thinking）+ 粉红开机动画（_pink）
+- interactive: ThreadPoolExecutor 后台 agent + 实时注入 + 线程安全 EventBus
 - jsonl_logger: EventBus 全事件旁路写入 logs/catnip.jsonl

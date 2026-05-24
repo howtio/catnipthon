@@ -27,9 +27,6 @@ class RunnerConfig:
     max_tool_retries: int = 2
     continue_on_tool_error: bool = False
     provider: str = ""  # "heuristic" | "deepseek"; empty = auto-detect
-    conversation_mode: bool = False
-    user_input_timeout: float = 0.5  # seconds to wait for user input between steps
-    check_user_input_every: int = 1  # check for user input every N steps
 
     def __post_init__(self) -> None:
         if not self.provider:

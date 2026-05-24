@@ -24,9 +24,5 @@ WORKER_HEARTBEAT = "worker.heartbeat"
 # LLM
 LLM_USAGE = "llm.usage"
 
-# Conversation / interactive agent
-AGENT_ASKING_USER = "agent.asking.user"
-AGENT_USER_RESPONSE = "agent.user.response"
-
 # Prompt
 PROMPT_COMPOSED = "prompt.composed"

@@ -10,19 +10,25 @@ from src.layers.eventbus_09.event_types import TOOL_CALL_RESULT, TOOL_CALL_FAILE
 
 
 class EventBusLayerApi:
-    """09-eventbus public API: publish/subscribe event system with tool result waiting."""
+    """09-eventbus public API: publish/subscribe event system with tool result waiting.
+
+    Thread-safe: publishes and subscriptions are protected by locks.
+    """
 
     def __init__(self) -> None:
         self._bus = EventBus()
         self._waiters: dict[str, threading.Event] = {}
+        self._waiters_lock = threading.Lock()
 
     def publish(self, event_type: str, payload: dict[str, Any] | None = None) -> Event:
         event = self._bus.publish(event_type, payload)
-        # Notify waiters for tool results
         if event_type in (TOOL_CALL_RESULT, TOOL_CALL_FAILED):
             tool_call_id = (payload or {}).get("tool_call_id", "")
-            if tool_call_id in self._waiters:
-                self._waiters[tool_call_id].set()
+            if tool_call_id:
+                with self._waiters_lock:
+                    ev = self._waiters.get(tool_call_id)
+                    if ev:
+                        ev.set()
         return event
 
     def subscribe(
@@ -38,17 +44,17 @@ class EventBusLayerApi:
     ) -> dict[str, Any] | None:
         """Wait for a tool.call.result or tool.call.failed event by tool_call_id."""
         event = threading.Event()
-        self._waiters[tool_call_id] = event
-
-        try:
-            # Also check if result already arrived
+        with self._waiters_lock:
+            # Check if result already arrived (race-free: lock covers both check and insert)
             for e in self._bus.get_history(TOOL_CALL_RESULT):
                 if e.payload.get("tool_call_id") == tool_call_id:
                     return e.payload
             for e in self._bus.get_history(TOOL_CALL_FAILED):
                 if e.payload.get("tool_call_id") == tool_call_id:
                     return e.payload
+            self._waiters[tool_call_id] = event
 
+        try:
             if not event.wait(timeout=timeout):
                 return None  # timeout
 
@@ -61,7 +67,8 @@ class EventBusLayerApi:
                     return e.payload
             return None
         finally:
-            self._waiters.pop(tool_call_id, None)
+            with self._waiters_lock:
+                self._waiters.pop(tool_call_id, None)
 
     def get_events(self, event_type: str | None = None) -> list[Event]:
         """Alias for get_history."""

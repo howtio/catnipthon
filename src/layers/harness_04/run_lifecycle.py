@@ -83,10 +83,7 @@ def run_lifecycle(
     # Build full prompt with context, skills, and memory
     full_prompt = f"{enhanced_prompt}\n\n{memory_block}" if memory_block else enhanced_prompt
 
-    # Enable conversation mode if history is provided
     runner_cfg = RunnerConfig(max_steps=15)
-    if conversation_history:
-        runner_cfg.conversation_mode = True
 
     # Run agent with real Runner
     answer = runner.run(task, runner_cfg, system_prompt=full_prompt,

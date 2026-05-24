@@ -15,7 +15,6 @@ from src.layers.tool_registry_10 import ToolRegistryLayerApi
 
 
 DEEPSEEK_BASE_URL = "https://api.deepseek.com"
-_USER_INPUT_TIMEOUT = 0.3  # short poll for user input between steps
 
 
 def _get_client() -> OpenAI | None:
@@ -26,29 +25,6 @@ def _get_client() -> OpenAI | None:
     return OpenAI(api_key=key, base_url=DEEPSEEK_BASE_URL)
 
 
-def _check_for_user_input(
-    eventbus: EventBusLayerApi,
-    step_count: int,
-    cfg: RunnerConfig,
-) -> str | None:
-    """Check if user injected input since last step. Returns injected message or None."""
-    if not cfg.conversation_mode:
-        return None
-    if step_count % cfg.check_user_input_every != 0:
-        return None
-
-    eventbus.publish(event_types.AGENT_ASKING_USER, {"step": step_count})
-
-    # Check history for any user response published since last step
-    events = eventbus.get_history(event_types.AGENT_USER_RESPONSE)
-    for evt in reversed(events):
-        inp: str = evt.payload.get("input", "") or ""
-        injected: bool = evt.payload.get("injected", False) or False
-        if inp.strip() and not injected:
-            return inp.strip()
-    return None
-
-
 def run_deepseek(
     task: RunTask,
     eventbus: EventBusLayerApi,
@@ -57,11 +33,11 @@ def run_deepseek(
     config: RunnerConfig | None = None,
     conversation_history: list[dict[str, Any]] | None = None,
 ) -> str:
-    """Run the agent with DeepSeek model and tool calling.
+    """Run the agent with DeepSeek reasoner model and tool calling.
 
     If conversation_history is provided, it is prepended so the model
-    sees prior turns. In conversation_mode, the loop checks for user
-    input injection between steps.
+    sees prior turns. Mid-execution requirements are injected via
+    task.appended_requirements (thread-safe).
     """
     client = _get_client()
     if client is None:
@@ -194,13 +170,7 @@ def run_deepseek(
 
         messages.extend(tool_results)
 
-        # Check for user input injection mid-execution
-        user_input = _check_for_user_input(eventbus, step_count, cfg)
-        if user_input:
-            eventbus.publish(event_types.AGENT_USER_RESPONSE, {"input": user_input, "injected": True})
-            messages.append({"role": "user", "content": f"[追加要求] {user_input}"})
-
-        # Inject any queue-appended requirements
+        # Inject any queue-appended requirements (thread-safe via TaskStatusStore lock)
         while task.appended_requirements:
             req = task.appended_requirements.pop(0)
             messages.append({"role": "user", "content": f"[追加要求] {req}"})

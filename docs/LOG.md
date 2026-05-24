@@ -86,6 +86,27 @@
     - `print_step_header()` — 使用 runner 层颜色（33）
     - `print_session_summary()` — 使用 harness 层颜色（92）
 - **验证**: mypy 90 文件 0 问题，pytest 60/60 通过
+- **提交**: 2c1fc43
+- **下一步**: 等待用户反馈
+
+### 2026-05-24 / v3.1 — 线程池 + Claude Code CLI + 实时注入
+
+- **版本**: `3.1`
+- **改动部分**:
+  - **线程安全基础**:
+    - EventBus 全面加锁（threading.Lock）保护 _subscribers、_history、_waiters
+    - TaskStatusStore 全面加锁，保证跨线程安全
+  - **Claude Code CLI 风格**:
+    - 移除随机颜色，改用固定专业调色板（OK=32, ERROR=91, HIGHLIGHT=96, DIM=90）
+    - 新增 `print_step_claude()`、`print_result_claude()`、`print_summary_claude()`、`print_thinking()`
+    - 使用 ◇ ┃ ✓ 符号，去除随机噪声
+  - **线程池 + 后台执行**:
+    - ThreadPoolExecutor(max_workers=1) 在后台线程运行 agent
+    - 主线程持续接受输入，任务运行时自动转为注入模式
+    - 任何非命令文本自动通过 append_requirement 注入
+    - 移除 AGENT_ASKING_USER / AGENT_USER_RESPONSE 事件
+    - 移除 _check_for_user_input()，简化 RunnerConfig
+- **验证**: mypy 90 文件 0 问题，pytest 60/60 通过
 - **提交**: （当前）
 - **下一步**: 等待用户反馈
 
