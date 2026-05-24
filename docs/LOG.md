@@ -94,7 +94,7 @@
   - `tests/test_tool_registry.py` — 更新 6→10 工具断言
   - `tests/test_deepseek_provider.py` — 更新 system prompt 断言
 - **验证**: mypy 95 文件 0 错误，pytest 69/69 通过
-- **提交**: （待 commit）
+- **提交**: 9f581be
 - **下一步**: 等待用户反馈，规划 5.0 方向
 
 ### 2026-05-24 / v3.0 — 队列层重构 + 推理路径显示 + CLI 视觉升级
