@@ -15,6 +15,39 @@ from src.layers.runner_08.types import RunnerConfig
 MODULE = "src.layers.runner_08.deepseek_provider"
 
 
+def _stream_chunk(content: str = "", reasoning: str | None = None,
+                  tool_calls: list | None = None,
+                  usage: object | None = None) -> MagicMock:
+    """Build a mock streaming chunk."""
+    delta = MagicMock()
+    delta.content = content
+    delta.reasoning_content = reasoning
+    delta.tool_calls = tool_calls
+    choice = MagicMock()
+    choice.delta = delta
+    chunk = MagicMock()
+    chunk.choices = [choice]
+    chunk.usage = usage
+    return chunk
+
+
+def _usage(prompt: int = 10, comp: int = 5, total: int = 15) -> MagicMock:
+    u = MagicMock()
+    u.prompt_tokens = prompt
+    u.completion_tokens = comp
+    u.total_tokens = total
+    return u
+
+
+def _make_stream(*chunks: MagicMock) -> MagicMock:
+    """Return iterable mock chunks ending with a usage chunk."""
+    usage_chunk = MagicMock()
+    usage_chunk.choices = []
+    usage_chunk.usage = _usage()
+    # Return a list so iteration works (list iterator)
+    return list(chunks) + [usage_chunk]
+
+
 def test_no_key_returns_message() -> None:
     with patch.dict(os.environ, {"DEEPSEEK_API_KEY": ""}, clear=True):
         task = RunTask(id="t1", user_message="hello")
@@ -62,12 +95,10 @@ def test_direct_answer_no_tools() -> None:
     registry = ToolRegistryLayerApi()
     cfg = RunnerConfig(max_steps=1)
 
-    mock_response = MagicMock()
-    mock_response.choices[0].message.content = "Hello, world!"
-    mock_response.choices[0].message.tool_calls = None
-
     mock_client = MagicMock()
-    mock_client.chat.completions.create.return_value = mock_response
+    mock_client.chat.completions.create.return_value = _make_stream(
+        _stream_chunk(content="Hello, world!", reasoning="thinking..."),
+    )
 
     with patch(
         "src.layers.runner_08.deepseek_provider._get_client",
@@ -87,12 +118,10 @@ def test_system_prompt_included() -> None:
     registry = ToolRegistryLayerApi()
     cfg = RunnerConfig(max_steps=1)
 
-    mock_response = MagicMock()
-    mock_response.choices[0].message.content = "OK"
-    mock_response.choices[0].message.tool_calls = None
-
     mock_client = MagicMock()
-    mock_client.chat.completions.create.return_value = mock_response
+    mock_client.chat.completions.create.return_value = _make_stream(
+        _stream_chunk(content="OK"),
+    )
 
     with patch(
         "src.layers.runner_08.deepseek_provider._get_client",
@@ -106,6 +135,8 @@ def test_system_prompt_included() -> None:
     assert messages[0]["content"] == "Be helpful."
     assert messages[1]["role"] == "user"
     assert messages[1]["content"] == "hello"
+    # streaming mode
+    assert call_kwargs.get("stream") is True
 
 
 def test_max_steps_exceeded() -> None:
@@ -114,23 +145,24 @@ def test_max_steps_exceeded() -> None:
     registry = ToolRegistryLayerApi()
     cfg = RunnerConfig(max_steps=2)
 
-    # Mock tool call to keep the loop going
-    mock_tool_call = MagicMock()
-    mock_tool_call.id = "call_1"
-    mock_tool_call.function.name = "list_files"
-    mock_tool_call.function.arguments = '{"path": "."}'
-
-    mock_response = MagicMock()
-    mock_response.choices[0].message.content = ""
-    mock_response.choices[0].message.tool_calls = [mock_tool_call]
+    # Mock streaming tool call
+    mock_tc = MagicMock()
+    mock_tc.index = 0
+    mock_tc.id = "call_1"
+    mock_tc.function.name = "list_files"
+    mock_tc.function.arguments = '{"path": "."}'
 
     mock_client = MagicMock()
-    mock_client.chat.completions.create.return_value = mock_response
+    # Both API calls return a stream with a tool call
+    mock_client.chat.completions.create.return_value = _make_stream(
+        _stream_chunk(content="", tool_calls=[mock_tc]),
+    )
 
     with patch(
         "src.layers.runner_08.deepseek_provider._get_client",
         return_value=mock_client,
     ):
-        result = run_deepseek(task, eventbus, registry, config=cfg)
+        with patch.object(eventbus, "wait_for_tool_result", return_value={"output": "OK"}):
+            result = run_deepseek(task, eventbus, registry, config=cfg)
 
     assert "[deepseek] Reached max steps" in result

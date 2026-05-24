@@ -194,15 +194,20 @@ def print_summary_claude(
         print(f"  {SYM_SUB} {_c('Tools:', DIM)} {tool_list}")
 
 
-def print_thinking(text: str) -> None:
-    """Print Claude Code-style thinking/reasoning text.
+def print_thinking(text: str, elapsed_s: float = 0, heartbeat: bool = False) -> None:
+    """Print Claude Code-style thinking/reasoning text with elapsed time.
 
-    Prefix with '> ' in dim color, truncated to ~80 chars.
+    Regular reasoning:  > thinking text here...
+    Heartbeat ping:     > thinking... (5.2s)
     """
+    if heartbeat:
+        print(f"\r  {_c(f'> thinking... ({elapsed_s:.0f}s)', DIM)}", end="")
+        return
     if not text:
         return
+    time_str = f" ({elapsed_s:.1f}s)" if elapsed_s else ""
     line = text[:80].replace("\n", " ")
-    print(f"\r  {_c(f'> {line}', DIM)}")
+    print(f"\r  {_c(f'> {line}{time_str}', DIM)}")
 
 
 def print_user_message(msg: str) -> None:

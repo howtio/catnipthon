@@ -152,8 +152,10 @@ class ProgressTracker:
 
     def _on_reasoning_chunk(self, event: Event) -> None:
         chunk = event.payload.get("chunk", "")
+        elapsed = event.payload.get("elapsed_s", 0)
+        heartbeat = event.payload.get("heartbeat", False)
         with _print_lock:
-            print_thinking(chunk)
+            print_thinking(chunk, elapsed_s=elapsed, heartbeat=heartbeat)
 
     def _on_answer(self, event: Event) -> None:
         total_duration = (time.time() - self._start_time) * 1000
