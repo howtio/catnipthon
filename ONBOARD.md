@@ -40,26 +40,33 @@ Executor 不做推理    — 只做 guard → 执行 → 返回结果
 
 | 项目 | 状态 |
 |------|------|
-| 版本 | 见 `pyproject.toml`（当前 `2.0`） |
-| 代码 | 11 层全链路实现 + CLI 2.0 交互式 REPL |
-| typecheck | mypy 92 文件，0 错误 |
-| 测试 | 60 个，全部通过 |
+| 版本 | 见 `pyproject.toml`（当前 `7.0`） |
+| 代码 | 11 层全链路实现 + CLI 2.0 交互式 REPL + Web UI 进行中 |
+| 分支 | `给阿嬷的agent`（Web UI 支线） |
+| typecheck | mypy 96 文件，0 错误 |
+| 测试 | 73 个，全部通过 |
 
 ---
 
 ## 5. 版本规则
 
 ```
-0.0  →  脚手架 3.0（文档体系 + 工程化 + CLI动画）← 当前
-0.1  →  Phase 1 完成（Gateway + Queue + Worker）
-0.2  →  Phase 2 完成（Harness + Context + Skills + Memory）
-0.3  →  Phase 3 完成（Runner + EventBus 骨架）
-0.4  →  Phase 4 完成（Tool Registry + Executor 骨架）
-0.5  →  Phase 5 完成（最小工具集可用）
-0.6  →  Phase 6 完成（DeepSeek 接入 + tool calling）
-0.7  →  Phase 7 完成（日志、验收、final report）
-1.0  →  MVP（全链路可跑、通过验收任务）
-2.0  →  CLI 2.0（交互式 REPL + 实时进度 + 提供商切换）← 当前
+0.0  →  脚手架 3.0（文档体系 + 工程化 + CLI动画）✅
+0.1  →  Phase 1 完成（Gateway + Queue + Worker）✅
+0.2  →  Phase 2 完成（Harness + Context + Skills + Memory）✅
+0.3  →  Phase 3 完成（Runner + EventBus 骨架）✅
+0.4  →  Phase 4 完成（Tool Registry + Executor 骨架）✅
+0.5  →  Phase 5 完成（最小工具集可用）✅
+0.6  →  Phase 6 完成（DeepSeek 接入 + tool calling）✅
+0.7  →  Phase 7 完成（日志、验收、final report）✅
+1.0  →  MVP（全链路可跑、通过验收任务）✅
+2.0  →  CLI 2.0（交互式 REPL + 实时进度 + 提供商切换）✅
+3.0–7.0 → 核心引擎增强（Web 搜索、Token 优化、流式超时等）✅
+────────────────────────────────────
+给阿嬷的agent 支线（当前）
+  ├── webui-v1（布局收口 + 真实联调）🔜
+  ├── webui-v2（流式输出 + 历史持久化）
+  └── webui-v3（完整能力）
 ```
 
 每次 `docs/LOG.md` 条目必须写版本号。未经用户明确确认，不允许跨大版本。

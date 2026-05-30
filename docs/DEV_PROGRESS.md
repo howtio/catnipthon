@@ -17,9 +17,14 @@
 ### 本阶段已完成
 - `.venv/` 虚拟环境创建 + 依赖安装
 - git 仓库初始化 + 首次提交 `af0b20c` + GitHub 推送
-- 备份分支：`backup/20260530-initial`
+- 备份分支：`backup/20260530-initial` 和 `backup/20260530-webui-v1-start`
 - 施工文档体系更新（CONSTRUCTION_PLAN / CODEX_MASTER / DEV_PROGRESS）
 - `mypy src` 通过（96 文件），`pytest` 通过（73/73）
+- CSS 低高度布局极紧压缩（max-height: 720px 新增 30+ 规则）
+- `/api/chat` 真实 agent 联调验证（中英文正常，heuristic provider 全链路可跑）
+
+### 待完成（Web UI v1）
+- [ ] 低高度窗口布局压缩（木棉花/纸飞机稳显）
 
 ### 待完成（Web UI v1）
 - [ ] 低高度窗口布局压缩（木棉花/纸飞机稳显）

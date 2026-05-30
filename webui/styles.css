@@ -687,6 +687,118 @@ body::before {
   }
 }
 
+/* ── 低高度窗口极紧压缩 ── */
+@media (max-height: 720px) {
+  .history-panel {
+    padding: 8px 10px 8px 10px;
+    gap: 6px;
+  }
+
+  .history-chest {
+    padding: 8px 10px 2px;
+  }
+
+  .history-chest__title {
+    font-size: 26px;
+  }
+
+  .history-chest__stage {
+    min-height: 120px;
+  }
+
+  .history-chest__hint {
+    font-size: 11px;
+  }
+
+  .history-vault__inner {
+    padding: 64px 10px 10px;
+  }
+
+  .history-list {
+    gap: 8px;
+    max-height: calc(100vh - 380px);
+  }
+
+  .history-note {
+    min-height: 100px;
+    padding: 10px 10px 12px;
+  }
+
+  .scene {
+    padding: 8px 16px 4px;
+  }
+
+  .scene__title {
+    font-size: clamp(36px, 4.5vw, 52px);
+  }
+
+  .scene__subtitle {
+    font-size: 11px;
+  }
+
+  .paper-stack {
+    width: min(60vw, 520px);
+    height: min(36vh, 360px);
+    min-height: 200px;
+  }
+
+  .letter-sheet {
+    padding: 20px 18px 16px;
+    gap: 8px;
+  }
+
+  .letter-sheet::before {
+    inset: 14px;
+  }
+
+  .sheet__content,
+  .sheet__editor {
+    font-size: 18px;
+  }
+
+  .control-dock {
+    margin-top: -20px;
+  }
+
+  .icon-button--flower img {
+    width: clamp(64px, 6vw, 96px);
+  }
+
+  .icon-button--plane img {
+    width: clamp(78px, 7vw, 112px);
+  }
+
+  .icon-button span {
+    font-size: 14px;
+  }
+
+  .seal-mark__cn {
+    font-size: clamp(28px, 2.6vw, 38px);
+  }
+
+  .seal-mark__icon {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+  }
+
+  .seal-mark__en {
+    font-size: clamp(24px, 2.3vw, 32px);
+  }
+
+  .history-vault__inner::before {
+    inset: 8px;
+  }
+
+  .history-panel__eyebrow {
+    font-size: 10px;
+  }
+
+  .history-panel__hint {
+    font-size: 10px;
+  }
+}
+
 .history-dialog {
   width: min(1080px, calc(100vw - 28px));
   max-width: none;

@@ -9,23 +9,28 @@
 ## 总体路线
 
 ```
-Phase 0 (0.0) ──→ 文档骨架 ✅ 当前
-Phase 1 (0.1) ──→ Gateway + Queue + Worker
-Phase 2 (0.2) ──→ Harness + Context + Skills + Memory
-Phase 3 (0.3) ──→ Runner + EventBus
-Phase 4 (0.4) ──→ Tool Registry + Executor 骨架
-Phase 5 (0.5) ──→ 最小工具集
-Phase 6 (0.6) ──→ DeepSeek 接入 + tool calling
-Phase 7 (0.7) ──→ 日志、验收、final report
+Phase 0 (0.0) ──→ 文档骨架 ✅
+Phase 1 (0.1) ──→ Gateway + Queue + Worker ✅
+Phase 2 (0.2) ──→ Harness + Context + Skills + Memory ✅
+Phase 3 (0.3) ──→ Runner + EventBus ✅
+Phase 4 (0.4) ──→ Tool Registry + Executor 骨架 ✅
+Phase 5 (0.5) ──→ 最小工具集 ✅
+Phase 6 (0.6) ──→ DeepSeek 接入 + tool calling ✅
+Phase 7 (0.7) ──→ 日志、验收、final report ✅
 ─────────────────────────────────────────
-1.0 (MVP)  ──→ 全链路可跑，通过验收任务
+1.0 (MVP)      ──→ 全链路可跑，通过验收任务 ✅
+─────────────────────────────────────────
+给阿嬷的agent 支线（当前）
+  ├── Web UI v1 ──→ 布局收口 + 真实联调 🔜
+  ├── Web UI v2 ──→ 流式 + 持久化
+  └── Web UI v3 ──→ 完整能力
 ```
 
 ---
 
 ## Phase 0：项目骨架（0.0）✅ 已完成
 
-> 注：Phase 1 和 Phase 2 在脚手架 2.0 期间曾短暂实现（含完整代码和测试），后在脚手架 3.0 重构中被**剥离回纯骨架状态**。当前代码库为干净的脚手架 3.0，各 Phase 需重新实现。
+> 注：Phase 1–7、1.0 MVP 均已全部实现并验证通过。以下各 Phase 的详细验收标准留作历史参考，当前状态标记为已完成。
 
 **目标：** 目录结构 + 全部开发文档 + 进度追踪体系。
 
@@ -46,7 +51,7 @@ Phase 7 (0.7) ──→ 日志、验收、final report
 
 ---
 
-## Phase 1：Gateway + Queue + Worker（0.1）
+## Phase 1：Gateway + Queue + Worker（0.1）✅ 已完成
 
 **目标：** 打通 CLI 输入 → 任务创建 → 入队 → 消费的最小链路。
 
@@ -74,7 +79,7 @@ Phase 7 (0.7) ──→ 日志、验收、final report
 
 ---
 
-## Phase 2：Harness + Context + Skills + Memory（0.2）
+## Phase 2：Harness + Context + Skills + Memory（0.2）✅ 已完成
 
 **目标：** 补齐 run 生命周期管理、文档装载、技能注入、记忆读写。
 
@@ -102,7 +107,7 @@ Phase 7 (0.7) ──→ 日志、验收、final report
 
 ---
 
-## Phase 3：Runner + EventBus（0.3）
+## Phase 3：Runner + EventBus（0.3）✅ 已完成
 
 **目标：** 建立受控 ReAct Loop 骨架，让 Runner 能通过 EventBus 发起工具请求并等待结果。
 
@@ -128,7 +133,7 @@ Phase 7 (0.7) ──→ 日志、验收、final report
 
 ---
 
-## Phase 4：Tool Registry + Executor 骨架（0.4）
+## Phase 4：Tool Registry + Executor 骨架（0.4）✅ 已完成
 
 **目标：** 补齐工具元数据和 Executor 执行前准入检查。
 
@@ -154,7 +159,7 @@ Phase 7 (0.7) ──→ 日志、验收、final report
 
 ---
 
-## Phase 5：最小工具集（0.5）
+## Phase 5：最小工具集（0.5）✅ 已完成
 
 **目标：** 实现 6 个工具的真实执行 + 3 层 guard。
 
@@ -180,7 +185,7 @@ Phase 7 (0.7) ──→ 日志、验收、final report
 
 ---
 
-## Phase 6：DeepSeek 接入 + Tool Calling（0.6）
+## Phase 6：DeepSeek 接入 + Tool Calling（0.6）✅ 已完成
 
 **目标：** 把真实模型接到 Runner，打通 AI SDK tool calling 链路。
 
@@ -204,7 +209,7 @@ Phase 7 (0.7) ──→ 日志、验收、final report
 
 ---
 
-## Phase 7：日志、验收、Final Report（0.7）
+## Phase 7：日志、验收、Final Report（0.7）✅ 已完成
 
 **目标：** JSONL 事件日志、run report 落盘、CI 可运行。
 
@@ -242,8 +247,65 @@ Gateway 创建任务 → Queue 入队 → Worker 消费 → Harness 创建 run
 
 ---
 
-## 1.0（MVP）
+## 1.0（MVP）✅ 已完成
 
 **标记条件：** Phase 0-7 全部完成 + 验收任务通过。
 
-**之后：** 等用户检查拍板，宣布 `2.0` 方向。
+**验收结果：** 2026-05-24 验收任务通过（DeepSeek 15 步循环：list_files → read_file×6 → shell_exec×5 → git_diff → 最终回答），全链路 11 层可观测。
+
+---
+
+## 给阿嬷的agent 支线（当前）
+
+> 用户宣布方向：以"给阿嬷的agent"为主分支，Web UI 为主题，版本按 v1 → v2 → v3 推进。
+> 当前版本：`7.0`（仓库 tag），下一里程碑：`webui-v1`。
+
+### Web UI v1 — 布局收口 + 真实联调
+
+**目标：** Web UI 前端布局稳定 + `/api/chat` 真实 agent 桥接通。
+
+**要做什么：**
+1. 低高度窗口布局压缩，确保木棉花（hibiscus）与纸飞机（paper-plane）稳定完整显示
+2. 移动端适配（@media 断点已存在但需联调验证）
+3. `<dialog>` 历史弹窗在真实数据下正常渲染
+4. 真实 agent 联调：`python -m src.main --webui` 启动，前端发问 → agent 回答全链路跑通
+5. 流式输出接前端（server-sent events 或轮询）
+6. `mypy src/` + `pytest` 全部通过
+7. 更新 LOG.md / DEV_PROGRESS.md / LAYER_STATUS.md
+8. git commit + push + tag `webui-v1`
+
+**验收标准：**
+- [ ] 窗口高度 ≤720px 时木棉花和纸飞机不溢出、不裁切、完整可见
+- [ ] 手机端（≤720px）布局正常，control-dock 吸底、信纸可读
+- [ ] `/api/chat` 真实 agent 返回结果正常显示在信纸上
+- [ ] 历史弹窗（旧信匣）能正确展示所有往来问答
+- [ ] mypy 0 错误，pytest 全部通过
+
+### Web UI v2 — 流式 + 持久化
+
+**目标：** Web UI 支持流式输出、历史持久化。
+
+**要做什么：**
+1. 后端 `/api/chat` 改为 SSE（Server-Sent Events）流式推送
+2. 前端逐字渲染回信（类似 CLI 的 `print_streaming_answer`）
+3. 对话历史持久化（JSON 文件或 Memory 层回读）
+4. WebUI 自身消息记录（`conversations.json`）
+
+**验收标准：**
+- [ ] 前端可见逐字输出回信
+- [ ] 刷新页面后历史对话仍在
+- [ ] mypy 0 错误，pytest 全部通过
+
+### Web UI v3 — 完整能力
+
+**目标：** Web UI 具备 CLI 交互式 REPL 的全部能力。
+
+**要做什么：**
+1. Provider 运行时切换（/provider deepseek|heuristic）
+2. 工具调用实时展示（类似 ProgressTracker）
+3. 推理路径展示（类似 print_thinking）
+4. 注入模式（agent 运行时追加要求）
+
+**验收标准：**
+- [ ] Web UI 可替代 CLI 交互式 REPL 作为主要使用界面
+- [ ] mypy 0 错误，pytest 全部通过

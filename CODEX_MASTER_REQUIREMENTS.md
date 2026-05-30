@@ -114,36 +114,40 @@ Gateway → Queue → Worker → Harness → Context → Skills → Memory → R
 
 | Phase | 内容 | 版本 | 状态 |
 |-------|------|------|------|
-| Phase 0 | 目录、文档、进度体系 | 0.0 | 已完成 |
-| Phase 1 | Gateway + Queue + Worker 骨架 | 0.1 | 未开始 |
-| Phase 2 | Harness + Context + Skills + Memory + EventBus 基础 | 0.2 | 未开始 |
-| Phase 3 | Runner + EventBus 工具回调 | 0.3 | 未开始 |
-| Phase 4 | Tool Registry + Executor 骨架 | 0.4 | 未开始 |
-| Phase 5 | 最小工具集 (list_files/read_file/write_file/patch_file/shell_exec/git_diff) | 0.5 | 未开始 |
-| Phase 6 | DeepSeek 接入 + AI SDK tool calling | 0.6 | 未开始 |
-| Phase 7 | 日志、验收、final report | 0.7 | 未开始 |
-| MVP | 全链路可跑、通过验收任务 | **1.0** | 未开始 |
-| 扩展 | 浏览器工具、搜索工具、Memory 持久化、CLI 增强 | 1.x | 未开始 |
+| Phase 0 | 目录、文档、进度体系 | 0.0 | ✅ 已完成 |
+| Phase 1 | Gateway + Queue + Worker 骨架 | 0.1 | ✅ 已完成 |
+| Phase 2 | Harness + Context + Skills + Memory + EventBus 基础 | 0.2 | ✅ 已完成 |
+| Phase 3 | Runner + EventBus 工具回调 | 0.3 | ✅ 已完成 |
+| Phase 4 | Tool Registry + Executor 骨架 | 0.4 | ✅ 已完成 |
+| Phase 5 | 最小工具集 (list_files/read_file/write_file/patch_file/shell_exec/git_diff) | 0.5 | ✅ 已完成 |
+| Phase 6 | DeepSeek 接入 + AI SDK tool calling | 0.6 | ✅ 已完成 |
+| Phase 7 | 日志、验收、final report | 0.7 | ✅ 已完成 |
+| MVP | 全链路可跑、通过验收任务 | **1.0** | ✅ 已完成 |
+| CLI 2.0 | 交互式 REPL + 实时进度 + 提供商切换 | 2.0 | ✅ 已完成 |
+| v3.0–v7.0 | 队列重构、推理路径、视觉升级、工具增强、搜索增强 | 3.0–7.0 | ✅ 已完成 |
+| --- | **给阿嬷的agent 支线（当前）** | --- | --- |
+| Web UI v1 | 布局收口 + 真实联调 | webui-v1 | 🔜 进行中 |
+| Web UI v2 | 流式输出 + 历史持久化 | webui-v2 | 📋 待开始 |
+| Web UI v3 | 完整能力（替代 CLI REPL） | webui-v3 | 📋 待开始 |
 
 ---
 
 ## 9. 版本体系
 
 ```
-0.0 → 0.1 → 0.2 → ... → 0.7 → 1.0 (MVP)
-                                ↓
-                         用户检查后宣布
-                        2.0 → 2.1 → ...
-                                ↓
-                         用户检查后宣布
-                              3.0 ...
+Phase 0–7 → 1.0 (MVP) → CLI 2.0 → v3.0–7.0（核心引擎成熟）
+                                        ↓
+                              用户宣布方向：给阿嬷的agent
+                                  ├── webui-v1（布局+联调）
+                                  ├── webui-v2（流式+持久化）
+                                  └── webui-v3（完整能力）
 ```
 
 规则：
-- `0.0` 到 `1.0` 按 Phase 自动推进
+- `0.0` → `7.0`：核心引擎 11 层全链路，已全部完成
+- **Web UI 阶段按 webui-v1 → v2 → v3 推进，Git tag 格式：`webui-v1`、`webui-v2`、`webui-v3`**
 - 每次 `docs/LOG.md` 条目必须写版本号
-- **1.0 之后的大版本号（2.0、3.0）由用户在检查时拍板，不允许自行跨越**
-- Git tag 格式：`v0.0`、`v0.1`、...、`v1.0`、`v2.0`
+- 主分支名：`给阿嬷的agent`（feature branch），不再使用 `master`/`main`
 
 ---
 

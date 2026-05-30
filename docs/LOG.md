@@ -60,6 +60,34 @@
 
 ## 最近记录
 
+### 2026-05-30 / Web UI v1 开工 — 环境搭建 + 布局修复 + 真实联调
+
+- **版本**: `7.0`（里程碑: `webui-v1`）
+- **分支**: `给阿嬷的agent`
+- **目标**:
+  - 创建开发环境（.venv、依赖、git init）
+  - 更新施工文档适配新分支线
+  - 修复低高度窗口布局（≤720px 极紧压缩）
+  - 真实联调：webui server 启动 → `/api/chat` 全链路验证
+- **开工检查**:
+  - 备份分支: `backup/20260530-webui-v1-start`，基于 `af0b20c`
+  - mypy: 96 文件 0 错误
+  - pytest: 73/73 通过
+- **修改文件**:
+  - `docs/CONSTRUCTION_PLAN.md` — 新增 Web UI v1/v2/v3 阶段
+  - `CODEX_MASTER_REQUIREMENTS.md` — Phase 表同步实际完成状态
+  - `docs/DEV_PROGRESS.md` — 更新当前施工进度
+  - `docs/LAYER_STATUS.md` — webui_server 状态更新
+  - `ONBOARD.md` — 版本号/测试数据同步 + 版本规则更新
+  - `webui/styles.css` — 新增 max-height:720px 极紧压缩
+  - `.gitignore` — 补充 workspace/ sessions/ .pytest_cache/
+- **验证结果**:
+  - mypy src/：96 文件 0 错误 ✅
+  - pytest：73/73 通过 ✅
+  - Web UI 联调：静态文件 200 ✅，`/api/chat` 中英文正常 ✅
+- **回滚判断**: 无需回滚
+- **下一步**: Web UI v1 继续 — 流式输出接入 + 移动端更多验证
+
 ### 2026-05-30 / v7.0 WIP — Web UI 接入暂停归档
 
 - **版本**: `7.0`
