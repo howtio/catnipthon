@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <title>情书 Agent</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Long+Cang&family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;500;700&family=Zhi+Mang+Xing&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="history-panel" aria-label="历史问答">
+        <button
+          id="historyChestToggle"
+          class="history-chest"
+          type="button"
+          aria-expanded="false"
+          aria-controls="historyVault"
+          title="摊开或收起旧信匣"
+        >
+          <span class="history-chest__eyebrow">往来书简</span>
+          <span class="history-chest__title">旧信匣</span>
+          <span id="historyChestHint" class="history-chest__hint">
+            点一下，摊开旧信匣
+          </span>
+          <div class="history-chest__stage" aria-hidden="true">
+            <img
+              class="history-chest__image history-chest__image--closed"
+              src="./assets/history-chest-closed.png"
+              alt=""
+            />
+            <img
+              class="history-chest__image history-chest__image--open"
+              src="./assets/history-chest-refined.png"
+              alt=""
+            />
+          </div>
+        </button>
+
+        <section id="historyVault" class="history-vault">
+          <div class="history-vault__inner">
+            <p class="history-panel__eyebrow">匣中旧信</p>
+            <p class="history-panel__hint">
+              点开其中一封，单独翻看那次来信与回信。
+            </p>
+            <div id="historyList" class="history-list"></div>
+          </div>
+        </section>
+      </aside>
+
+      <main class="scene" aria-label="情书 Agent 界面">
+        <div class="scene__wash scene__wash--left"></div>
+        <div class="scene__wash scene__wash--right"></div>
+
+        <header class="scene__header">
+          <p class="scene__eyebrow">写给阿嬷的情书式 Agent GUI</p>
+          <h1 class="scene__title">情书 Agent</h1>
+          <p class="scene__subtitle">
+            木槿添纸，纸飞机寄信。回答会像回信一样，轻轻叠上来。
+          </p>
+        </header>
+
+        <section class="paper-stage" aria-live="polite">
+          <div id="paperStack" class="paper-stack"></div>
+        </section>
+
+        <footer class="control-dock">
+          <button
+            id="composeButton"
+            class="icon-button icon-button--flower"
+            type="button"
+            aria-label="添加新的信纸"
+            title="添一页新信纸"
+          >
+            <img src="./assets/hibiscus.png" alt="" />
+            <span>添一纸</span>
+          </button>
+
+          <div class="seal-mark" aria-hidden="true">
+            <span class="seal-mark__cn">情书</span>
+            <span class="seal-mark__icon">✉</span>
+            <span class="seal-mark__en">agent</span>
+          </div>
+
+          <button
+            id="sendButton"
+            class="icon-button icon-button--plane"
+            type="button"
+            aria-label="发送信纸"
+            title="寄出这封信"
+          >
+            <img src="./assets/paper-plane.png" alt="" />
+            <span>寄出去</span>
+          </button>
+        </footer>
+      </main>
+    </div>
+
+    <dialog id="historyDialog" class="history-dialog">
+      <form method="dialog" class="history-dialog__backdrop">
+        <button class="history-dialog__close" value="cancel" aria-label="关闭">
+          合上信匣
+        </button>
+      </form>
+
+      <div class="history-dialog__body">
+        <div class="history-dialog__meta">
+          <p class="history-dialog__eyebrow">往来回看</p>
+          <h3 id="historyDialogTitle" class="history-dialog__title"></h3>
+        </div>
+        <div id="historyDialogSheets" class="history-dialog__sheets"></div>
+      </div>
+    </dialog>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

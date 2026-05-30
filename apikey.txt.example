@@ -1,0 +1,7 @@
+# 在此填写你的 DeepSeek API Key，然后重命名为 apikey.txt
+# apikey.txt 已在 .gitignore 中排除，不会进入 git 仓库
+#
+# 加载方式：
+#   Git Bash:  export $(grep DEEPSEEK_API_KEY apikey.txt | xargs)
+#   PowerShell: Get-Content apikey.txt | ForEach-Object { $k,$v = $_ -split '='; if ($k -eq 'DEEPSEEK_API_KEY') { Set-Item -Path "env:$k" -Value $v } }
+DEEPSEEK_API_KEY=sk-your-key-here

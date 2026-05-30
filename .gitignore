@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+
+# Secrets — 绝对不进仓库
+.local-secrets/
+.env.local
+*.env.local
+apikey.txt
+
+# Logs
+logs/*.jsonl
+logs/*.json
+logs/*.log
+logs/
+
+# Workspace
+workspace/
+workspaces/
+
+# Sessions
+sessions/
+
+# pytest
+.pytest_cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
