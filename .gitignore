@@ -28,6 +28,10 @@ workspaces/
 # Sessions
 sessions/
 
+# Generated artifacts
+output/
+snake.html
+
 # pytest
 .pytest_cache/
 

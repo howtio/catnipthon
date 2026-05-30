@@ -159,4 +159,4 @@
 - cli: Claude Code 风格 CLI（print_step_claude / print_result_claude / print_summary_claude / print_thinking / print_streaming_answer）+ 粉红开机动画（_pink）
 - interactive: ThreadPoolExecutor 后台 agent + 实时注入 + 线程安全 EventBus
 - jsonl_logger: EventBus 全事件旁路写入 logs/catnip.jsonl
-- webui_server: 静态页面托管 + `/api/chat` 桥接（Web UI v1 进行中）
+- webui_server: 静态页面托管 + `/api/chat` 桥接 + 后台线程 agent 执行 + 实时思考轮询 + 会话清空（Web UI v1 已完成 ✅）

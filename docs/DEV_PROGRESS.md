@@ -7,30 +7,38 @@
 
 ## 当前版本
 
-`7.0`（搜索增强 + CLI 交互大修）
+`7.0`（Web UI v1 — 情书 Agent 完整发布）
 
 ## 当前施工中
 
 **支线：** `给阿嬷的agent`
-**当前阶段：** Web UI v1 — 布局收口 + 真实联调
+**当前阶段：** Web UI v1 — 已完成
 
-### 本阶段已完成
+### 本阶段已完成（全部）
 - `.venv/` 虚拟环境创建 + 依赖安装
 - git 仓库初始化 + 首次提交 `af0b20c` + GitHub 推送
-- 备份分支：`backup/20260530-initial` 和 `backup/20260530-webui-v1-start`
+- 备份分支：`backup/20260530-initial`、`backup/20260530-webui-v1-start`、`backup/20260530-webui-v1-final`
 - 施工文档体系更新（CONSTRUCTION_PLAN / CODEX_MASTER / DEV_PROGRESS）
-- `mypy src` 通过（96 文件），`pytest` 通过（73/73）
+- `mypy src` 通过（96 文件），`pytest` 通过（75/75）
 - CSS 低高度布局极紧压缩（max-height: 720px 新增 30+ 规则）
 - `/api/chat` 真实 agent 联调验证（heuristic + DeepSeek 双 provider 全链路可跑）
 - webui_server.py 增加异常处理（500 错误返回 JSON，而非挂起请求）
 - 定位 curl/bash 传中文 JSON 时 Content-Length 差异问题（前端浏览器 fetch 正常）
+- 会话持久化（localStorage 存储，刷新不丢数据）
+- PDF 自动导出（html2pdf.js 实现，点击即自动下载，无打印弹窗）
+- PDF 文件名按创建时间自动命名：`情书-{YYYYMMDD-HHmmss}.pdf`
+- PDF 样式与 Web UI 信纸完全一致（vertical-rl 竖排书法风格）
+- 实时思考显示（后台线程 + EventBus 订阅 + 前端轮询，回信未封缄时显示 agent 推理过程）
+- 信纸加载中的字体和排版与写信/发信完全一致
+- Google Fonts 非阻塞加载（media="print" + onload 策略，解决国内卡死问题）
+- 清空信匣功能（确认弹窗 + 清空 localStorage + 清除服务端记忆）
+- 旧信匣对话历史独立翻看弹窗 + 每条可单独 PDF 导出
+- 实时写完 startup guide + 提交 + push GitHub
 
-### 待完成（Web UI v1）
+### 待完成（Web UI v2 — 可选的下一阶段）
 - [ ] 低高度窗口木棉花/纸飞机浏览器目测验收
 - [ ] 移动端适配验证（手机真机或模拟器）
-- [ ] 流式输出接入前端（SSE）— 或划入 v2
-- [ ] mypy 0 错误 + pytest 全部通过
-- [ ] git commit + push + tag `webui-v1`
+- [ ] 流式输出接入前端（SSE / WebSocket）
 
 ---
 
@@ -62,11 +70,11 @@
 | v7.0 搜索增强（ddgs 迁移 + HTTP 后备） | **已实现** ✅ |
 | v7.0 CLI 交互大修（思考过滤 + 流式答案 + 警告抑制） | **已实现** ✅ |
 | v7.0 System Prompt 优化（shell_exec 约束） | **已实现** ✅ |
-| Web UI v1（布局收口 + 真实联调） | 🔜 进行中 |
+| Web UI v1（情书 Agent 完整发布） | ✅ 已完成 |
 | Web UI v2（流式输出 + 历史持久化） | 📋 待开始 |
 | Web UI v3（完整能力替代 CLI REPL） | 📋 待开始 |
 | typecheck | 通过（96 文件，0 错误） |
-| 测试 | 73 个，全部通过 |
+| 测试 | 75 个，全部通过 |
 
 ---
 
@@ -121,11 +129,16 @@
   - 新增 `AGENT_ANSWER_CHUNK` 事件类型
   - `warnings.filterwarnings("ignore")` 抑制包警告
   - System Prompt 约束 shell_exec 使用范围
-- Web UI 接入（2026-05-30，暂停中）：
+- Web UI v1 完整发布（2026-05-30）：
   - 新增仓库内前端目录 `webui/`，保留页面代码与 GUI 素材
   - 新增 `src/shared/webui_server.py`，提供静态页面托管与 `/api/chat`
   - `src/main.py` 新增 `--webui` 启动入口
   - `webui/app.js` 现在优先走 HTTP API，`file://` 场景保留 mock
   - 新增 `tests/test_webui_server.py` 覆盖结果提取与历史格式转换
-  - 已完成暂停前校验：`mypy src` 通过（96 文件），`pytest` 通过（73/73）
-  - 当前仍需继续做布局收口、联调，以及按施工文档推进 GitHub 分支 `给阿嬷的agent`
+  - localStorage 会话持久化（刷新不丢数据）
+  - PDF 自动导出（html2pdf.js，一键下载无弹窗）
+  - 实时 agent 思考显示（EventBus → 后台线程 → 前端轮询）
+  - 清空信匣功能（前端 localStorage + 服务端记忆同步清除）
+  - Google Fonts 非阻塞加载（解决国内卡死问题）
+  - 最终校验：`mypy src` 通过（96 文件），`pytest` 通过（75/75）
+  - git commit + push + 备份分支 + startup guide

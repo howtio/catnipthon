@@ -1,4 +1,5 @@
 const paperColumnCount = 10;
+const STORAGE_KEY = "catnip-conversations";
 const demoMode = new URLSearchParams(window.location.search).get("demo");
 
 const initialConversations = [
@@ -11,14 +12,38 @@ const initialConversations = [
   },
 ];
 
+function loadConversations() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    }
+  } catch (_) {}
+  return null;
+}
+
+function saveConversations() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state.conversations));
+  } catch (_) {}
+}
+
+const savedConvs = loadConversations();
 const state = {
-  conversations: initialConversations,
+  conversations: savedConvs || [...initialConversations],
   composing: false,
   sending: false,
   draft: "",
   historyOpen: false,
   openedConversationId: null,
 };
+
+if (!savedConvs) {
+  saveConversations();
+}
 
 const historyPanel = document.querySelector(".history-panel");
 const historyChestToggle = document.querySelector("#historyChestToggle");
@@ -59,42 +84,71 @@ sendButton.addEventListener("click", async () => {
     id: createId(),
     question: content,
     answer: "",
+    thinking: "",
     pending: true,
     createdAt: new Date().toISOString(),
   };
 
-  state.conversations = [...state.conversations, conversation];
+  const priorConversations = [...state.conversations];
+  state.conversations = [...priorConversations, conversation];
   state.draft = "";
   state.composing = false;
   state.sending = true;
+  saveConversations();
   render();
 
   try {
-    const answer = await requestAgentReply(content, state.conversations);
+    const answer = await requestAgentReply(content, priorConversations, (thinking) => {
+      state.conversations = state.conversations.map((item) =>
+        item.id === conversation.id
+          ? { ...item, thinking }
+          : item,
+      );
+      render();
+    });
     state.conversations = state.conversations.map((item) =>
       item.id === conversation.id
         ? {
             ...item,
             answer,
+            thinking: "",
             pending: false,
           }
         : item,
     );
+    saveConversations();
   } catch (error) {
     state.conversations = state.conversations.map((item) =>
       item.id === conversation.id
         ? {
             ...item,
             answer: "这封回信暂时被风拦住了，稍后我们再试一次。",
+            thinking: "",
             pending: false,
           }
         : item,
     );
+    saveConversations();
     console.error(error);
   } finally {
     state.sending = false;
     render();
   }
+});
+
+document.querySelector("#clearHistoryBtn").addEventListener("click", () => {
+  if (state.conversations.length === 0) return;
+  if (!confirm("确定要清空所有信纸吗？")) return;
+
+  // Clear localStorage
+  localStorage.removeItem(STORAGE_KEY);
+  // Reset conversations to initial welcome
+  state.conversations = [...initialConversations];
+  saveConversations();
+  render();
+
+  // Also clear server-side memory
+  fetch("/api/history/clear", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }).catch(() => {});
 });
 
 historyList.addEventListener("click", (event) => {
@@ -116,12 +170,33 @@ historyList.addEventListener("click", (event) => {
 });
 
 historyDialog.addEventListener("click", (event) => {
+  const btn = event.target.closest("[data-export-conversation]");
+  if (btn) {
+    const conversation = state.conversations.find(
+      (item) => item.id === btn.dataset.exportConversation,
+    );
+    if (conversation) {
+      exportConversation(conversation);
+    }
+    return;
+  }
   if (event.target === historyDialog) {
     historyDialog.close();
   }
 });
 
 window.addEventListener("resize", queuePaperAlignment);
+
+paperStack.addEventListener("click", (event) => {
+  const btn = event.target.closest("[data-export-conversation]");
+  if (!btn) return;
+  const conversation = state.conversations.find(
+    (item) => item.id === btn.dataset.exportConversation,
+  );
+  if (conversation) {
+    exportConversation(conversation);
+  }
+});
 
 applyDemoState();
 render();
@@ -213,7 +288,12 @@ function renderPaperStack() {
           }
           <div class="sheet__footer">
             <span>${escapeHtml(metaTime)}</span>
-            <span>${escapeHtml(footerText)}</span>
+            <span>
+              ${escapeHtml(footerText)}
+              ${paper.kind === "answer" && !paper.pending
+                ? `<button class="sheet__print-trigger" data-export-conversation="${paper.conversationId}">印一份</button>`
+                : ""}
+            </span>
           </div>
         </article>
       `;
@@ -233,6 +313,15 @@ function renderHistoryDialog(conversation) {
     state.conversations.findIndex((item) => item.id === conversation.id) + 1;
 
   historyDialogTitle.textContent = `第 ${conversationIndex} 封`;
+
+  const oldPrintBtn = historyDialog.querySelector(".history-dialog__print");
+  if (oldPrintBtn) oldPrintBtn.remove();
+  const printBtn = document.createElement("button");
+  printBtn.className = "history-dialog__print";
+  printBtn.textContent = "印一份";
+  printBtn.dataset.exportConversation = conversation.id;
+  historyDialog.querySelector(".history-dialog__meta").appendChild(printBtn);
+
   historyDialogSheets.innerHTML = [
     {
       meta: "来信",
@@ -265,6 +354,7 @@ function getVisiblePapers() {
   const paperEntries = state.conversations.flatMap((conversation) => [
     {
       id: `${conversation.id}-question`,
+      conversationId: conversation.id,
       kind: "question",
       meta: "来信",
       stamp: "所问",
@@ -274,10 +364,13 @@ function getVisiblePapers() {
     },
     {
       id: `${conversation.id}-answer`,
+      conversationId: conversation.id,
       kind: "answer",
       meta: "回信",
       stamp: conversation.pending ? "未封缄" : "已回",
-      content: conversation.pending ? "稍等一会儿，回信正在路上。" : conversation.answer,
+      content: conversation.pending
+        ? (conversation.thinking || "稍等一会儿，回信正在路上。")
+        : conversation.answer,
       createdAt: conversation.createdAt,
       footer: conversation.pending ? "正在替你铺开下一页。" : "回答会像回信一样压在上层。",
       pending: conversation.pending,
@@ -346,7 +439,7 @@ function focusDraftEditor() {
   selection.addRange(range);
 }
 
-async function requestAgentReply(question, conversations) {
+async function requestAgentReply(question, conversations, onThinking) {
   if (window.agentConnector && typeof window.agentConnector.ask === "function") {
     const result = await window.agentConnector.ask({
       question,
@@ -359,13 +452,14 @@ async function requestAgentReply(question, conversations) {
   }
 
   if (window.location.protocol.startsWith("http")) {
-    return requestHttpAgentReply(question, conversations);
+    return requestHttpAgentReply(question, conversations, onThinking);
   }
 
   return simulateReply(question);
 }
 
-async function requestHttpAgentReply(question, conversations) {
+async function requestHttpAgentReply(question, conversations, onThinking) {
+  // Step 1: POST /api/chat — agent starts in background, returns run_id
   const response = await fetch("/api/chat", {
     method: "POST",
     headers: {
@@ -380,12 +474,52 @@ async function requestHttpAgentReply(question, conversations) {
     }),
   });
 
+  if (response.status === 429) {
+    throw new Error("上一封回信还在落款，请稍后再寄下一封。");
+  }
+
   if (!response.ok) {
     throw new Error(`HTTP ${response.status}`);
   }
 
   const payload = await response.json();
-  return String(payload.answer || "").trim();
+  if (payload.answer) {
+    return String(payload.answer).trim();
+  }
+
+  if (!payload.run_id) {
+    throw new Error("No run_id returned");
+  }
+
+  // Step 2: Poll /api/chat/think/{run_id} until completed
+  let lastThinking = "";
+  const startedAt = Date.now();
+
+  while (Date.now() - startedAt < 90000) {
+    await sleep(650);
+
+    const pollRes = await fetch(`/api/chat/think/${payload.run_id}`);
+    if (!pollRes.ok) {
+      throw new Error(`Poll HTTP ${pollRes.status}`);
+    }
+
+    const data = await pollRes.json();
+
+    if (data.thinking && data.thinking !== lastThinking) {
+      lastThinking = data.thinking;
+      if (onThinking) onThinking(summarizeThinking(data.thinking));
+    }
+
+    if (data.status === "completed") {
+      return String(data.answer || "").trim();
+    }
+
+    if (data.status === "error") {
+      throw new Error(data.error || "Agent run failed");
+    }
+  }
+
+  throw new Error("Agent response timed out");
 }
 
 function simulateReply(question) {
@@ -464,6 +598,24 @@ function escapeHtml(text) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function summarizeThinking(thinking) {
+  const lines = String(thinking)
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  if (lines.length === 0) {
+    return "回信正在铺纸。";
+  }
+
+  const latest = lines.at(-1).replace(/^——\s*/, "");
+  return truncate(latest, 40);
 }
 
 function createId() {
@@ -551,6 +703,7 @@ function applyDemoState() {
         createdAt: new Date().toISOString(),
       },
     ];
+    saveConversations();
     return;
   }
 
@@ -566,5 +719,38 @@ function applyDemoState() {
         createdAt: new Date().toISOString(),
       },
     ];
+    saveConversations();
   }
+}
+
+function exportConversation(conversation) {
+  const ts = conversation.createdAt.slice(0, 19).replace(/[T:]/g, "-");
+
+  // Build a print-friendly element matching the letter style
+  const el = document.createElement("div");
+  el.style.cssText = "padding:40px;max-width:800px;margin:0 auto;font-family:'Noto Serif SC','Songti SC',serif;color:#333;";
+  el.innerHTML = `
+    <div style="display:flex;justify-content:space-between;color:#666;font-size:14px;border-bottom:1px solid #ddd;padding-bottom:10px;margin-bottom:20px;">
+      <span>来信</span>
+      <span>${escapeHtml(formatHistoryDate(conversation.createdAt))}</span>
+    </div>
+    <div style="font-size:16px;line-height:2;white-space:pre-wrap;margin-bottom:28px;">${escapeHtml(conversation.question).replace(/\n/g, "<br />")}</div>
+    <hr style="border:none;border-top:1px dashed #ccc;margin:28px 0;" />
+    <div style="display:flex;justify-content:space-between;color:#666;font-size:14px;border-bottom:1px solid #ddd;padding-bottom:10px;margin-bottom:20px;">
+      <span>回信</span>
+      <span></span>
+    </div>
+    <div style="font-size:16px;line-height:2;white-space:pre-wrap;">${escapeHtml(conversation.pending ? "这封回信还在慢慢写。" : conversation.answer).replace(/\n/g, "<br />")}</div>
+  `;
+
+  // Use html2pdf to auto-save as PDF
+  const opt = {
+    margin: [15, 15],
+    filename: `情书-${ts}.pdf`,
+    image: { type: "jpeg", quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true },
+    jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+    pagebreak: { mode: "avoid-all" },
+  };
+  html2pdf().set(opt).from(el).save();
 }

@@ -60,6 +60,64 @@
 
 ## 最近记录
 
+### 2026-05-30 / Web UI v1 完整发布 — 实时思考 + PDF 自动导出 + 清空信匣
+
+- **版本**: `7.0`（里程碑: `webui-v1`）
+- **分支**: `给阿嬷的agent`
+- **目标**:
+  - 实时 agent 思考显示（回信未封缄时看到推理过程）
+  - PDF 自动导出（html2pdf.js，无打印弹窗）
+  - 清空信匣功能
+  - Google Fonts 非阻塞加载（解决国内卡死问题）
+  - 整理代码 + git push + 撰写 startup guide
+- **开工检查**:
+  - 当前分支: `给阿嬷的agent`
+  - 备份分支: `backup/20260530-webui-v1-final`
+  - mypy: 96 文件 0 错误
+  - pytest: 75/75 通过
+- **修改文件**:
+  - `webui/app.js` — 新增 requestHttpAgentReply 异步轮询、onThinking 实时渲染、exportConversation html2pdf 自动下载、clearHistoryBtn 点击处理、getVisiblePapers 使用 thinking 字段
+  - `webui/index.html` — Google Fonts 改为非阻塞加载（media="print" + onload）、引入 html2pdf.bundle.min.js、清空信匣按钮
+  - `webui/styles.css` — 删除 @media print / @page / .sheet__thinking，保留导出按钮样式、新增 .history-clear-btn
+  - `webui/assets/html2pdf.bundle.min.js` — 新增加载（jsdelivr CDN）
+  - `src/shared/webui_server.py` — 新增 _run_buffers/_active_run_id 状态管理、do_GET 轮询端点、_start_web_task_background 后台线程 + EventBus 订阅、_on_reasoning_chunk/_on_answer_chunk/_on_tool_call 缓冲写入
+  - `src/layers/harness_04/run_lifecycle.py` — 新增 import Callable（补充之前缺失）
+  - `src/layers/executor_11/tools.py` — 新增 import Callable（补充之前缺失）
+  - `tests/test_harness.py` — 新增 import Callable
+  - `tests/test_webui_server.py` — 新增 2 个测试（历史清空、双重请求拒绝）
+  - `docs/DEV_PROGRESS.md` — 更新已完成条目
+- **验证**:
+  - mypy: 96 文件 0 错误 ✅
+  - pytest: 75/75 通过 ✅
+  - 静态文件 200 ✅，html2pdf.js 可加载 ✅，清空信匣按钮交互正常 ✅
+- **提交**: （待补充）
+- **下一步**: 等待用户反馈，规划 Web UI v2 或下一阶段
+
+### 2026-05-30 / Web UI v1 追加 — localStorage 持久化 + PDF 导出
+
+- **版本**: `7.0`（里程碑: `webui-v1`）
+- **分支**: `给阿嬷的agent`
+- **目标**:
+  - 会话持久化：刷新页面不丢数据
+  - PDF 导出：每封信可导出为 PDF
+  - 时间戳命名：导出文件名按创建时间自动命名
+- **开工检查**:
+  - 当前分支: `给阿嬷的agent`
+  - mypy: 96 文件 0 错误
+  - pytest: 73/73 通过
+- **修改文件**:
+  - `webui/app.js` — 新增 localStorage 持久化（loadConversations/saveConversations）、exportConversation/buildPrintHTML 导出函数、纸面/旧信匣导出按钮、paperStack 导出事件委托
+  - `webui/styles.css` — 新增 @media print 打印样式、.print-export / .sheet__print-trigger / .history-dialog__print 样式
+  - `docs/DEV_PROGRESS.md` — 更新已完成条目
+- **验证**:
+  - mypy: 96 文件 0 错误
+  - pytest: 73/73 通过
+  - `/api/chat` 真实调用正常（DeepSeek）
+- **下一步**:
+  - 低高度窗口木棉花/纸飞机目测验收
+  - 移动端适配验证
+  - webui-v1 tag 发布
+
 ### 2026-05-30 / Web UI v1 开工 — 环境搭建 + 布局修复 + 真实联调
 
 - **版本**: `7.0`（里程碑: `webui-v1`）

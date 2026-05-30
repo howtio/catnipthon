@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from src.shared.webui_server import _coerce_history, _extract_result
+from src.shared.webui_server import _coerce_history, _dedupe_current_question, _extract_result
 
 
 def test_extract_result_from_final_report() -> None:
@@ -40,4 +40,19 @@ def test_coerce_history_builds_runner_message_format() -> None:
         {"role": "user", "content": "你好"},
         {"role": "assistant", "content": "你好呀"},
         {"role": "user", "content": "继续"},
+    ]
+
+
+def test_dedupe_current_question_drops_optimistic_duplicate() -> None:
+    history = [
+        {"role": "user", "content": "你好"},
+        {"role": "assistant", "content": "你好呀"},
+        {"role": "user", "content": "继续"},
+    ]
+
+    result = _dedupe_current_question("继续", history)
+
+    assert result == [
+        {"role": "user", "content": "你好"},
+        {"role": "assistant", "content": "你好呀"},
     ]

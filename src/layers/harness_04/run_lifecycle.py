@@ -15,9 +15,8 @@ from src.layers.harness_04.create_run import create_run
 from src.layers.harness_04.build_final_report import build_final_report, format_final_report
 
 
-def _collect_tool_summary(eventbus: EventBusLayerApi) -> dict[str, int]:
-    """Build tool_name → call_count from event history."""
-    step_events = eventbus.get_history(event_types.AGENT_STEP_FINISHED)
+def _collect_tool_summary(step_events: list[Any]) -> dict[str, int]:
+    """Build tool_name → call_count from step-finished events."""
     counter: Counter[str] = Counter()
     for e in step_events:
         tool = e.payload.get("tool", "")
@@ -26,10 +25,9 @@ def _collect_tool_summary(eventbus: EventBusLayerApi) -> dict[str, int]:
     return dict(counter)
 
 
-def _collect_modified_files(eventbus: EventBusLayerApi) -> list[str]:
-    """Detect files written/patched from tool call args."""
+def _collect_modified_files(tool_events: list[Any]) -> list[str]:
+    """Detect files written/patched from tool-call events."""
     modified: list[str] = []
-    tool_events = eventbus.get_history(event_types.TOOL_CALL_REQUESTED)
     for e in tool_events:
         tool_name = e.payload.get("tool_name", "")
         args = e.payload.get("arguments", {})
@@ -40,14 +38,22 @@ def _collect_modified_files(eventbus: EventBusLayerApi) -> list[str]:
     return modified
 
 
-def _collect_token_usage(eventbus: EventBusLayerApi) -> dict[str, int]:
-    """Sum token usage from LLM_USAGE events."""
-    events = eventbus.get_history(event_types.LLM_USAGE)
+def _collect_token_usage(events: list[Any]) -> dict[str, int]:
+    """Sum token usage from llm.usage events."""
     return {
         "prompt_tokens": sum(e.payload.get("prompt_tokens", 0) for e in events),
         "completion_tokens": sum(e.payload.get("completion_tokens", 0) for e in events),
         "total_tokens": sum(e.payload.get("total_tokens", 0) for e in events),
     }
+
+
+def _slice_event_history(
+    eventbus: EventBusLayerApi,
+    event_type: str,
+    start_count: int,
+) -> list[Any]:
+    """Return only the events published after a per-run baseline."""
+    return eventbus.get_history(event_type)[start_count:]
 
 
 def run_lifecycle(
@@ -66,6 +72,9 @@ def run_lifecycle(
     """
     run = create_run(task.user_message)
     start = time.time()
+    step_start_count = len(eventbus.get_history(event_types.AGENT_STEP_FINISHED))
+    tool_start_count = len(eventbus.get_history(event_types.TOOL_CALL_REQUESTED))
+    llm_start_count = len(eventbus.get_history(event_types.LLM_USAGE))
 
     eventbus.publish(event_types.RUN_STARTED, {"run_id": run.run_id, "user_message": task.user_message})
 
@@ -98,16 +107,30 @@ def run_lifecycle(
                         conversation_history=conversation_history)
 
     # Collect run metrics from event history
-    step_events = eventbus.get_history(event_types.AGENT_STEP_FINISHED)
+    step_events = _slice_event_history(
+        eventbus,
+        event_types.AGENT_STEP_FINISHED,
+        step_start_count,
+    )
+    tool_events = _slice_event_history(
+        eventbus,
+        event_types.TOOL_CALL_REQUESTED,
+        tool_start_count,
+    )
+    llm_events = _slice_event_history(
+        eventbus,
+        event_types.LLM_USAGE,
+        llm_start_count,
+    )
     steps_used = len(step_events) or 1
 
     run.status = "completed"
     run.final_answer = answer
     run.steps_used = steps_used
     run.duration_ms = (time.time() - start) * 1000
-    run.tool_summary = _collect_tool_summary(eventbus)
-    run.modified_files = _collect_modified_files(eventbus)
-    run.token_usage = _collect_token_usage(eventbus)
+    run.tool_summary = _collect_tool_summary(step_events)
+    run.modified_files = _collect_modified_files(tool_events)
+    run.token_usage = _collect_token_usage(llm_events)
 
     eventbus.publish(event_types.RUN_FINISHED, {
         "run_id": run.run_id,

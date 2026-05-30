@@ -45,3 +45,17 @@ def test_harness_publishes_run_events() -> None:
     assert "run.started" in types
     assert "run.finished" in types
     assert "prompt.composed" in types
+
+
+def test_harness_metrics_do_not_accumulate_across_runs(monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    monkeypatch.setenv("CATNIP_RUNNER_PROVIDER", "heuristic")
+    monkeypatch.delenv("DEEPSEEK_API_KEY", raising=False)
+    harness = _make_harness()
+
+    first = harness.run(RunTask(id="first", user_message="run tests"))
+    second = harness.run(RunTask(id="second", user_message="run tests"))
+
+    assert "Steps: 2" in first
+    assert "Tools used: list_files (1), read_file (1)" in first
+    assert "Steps: 2" in second
+    assert "Tools used: list_files (1), read_file (1)" in second

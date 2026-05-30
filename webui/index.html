@@ -7,13 +7,20 @@
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
     <title>情书 Agent</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Long+Cang&family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;500;700&family=Zhi+Mang+Xing&display=swap"
       rel="stylesheet"
+      media="print"
+      onload="this.media='all'"
     />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Long+Cang&family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;500;700&family=Zhi+Mang+Xing&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
     <link rel="stylesheet" href="./styles.css" />
+    <script src="./assets/html2pdf.bundle.min.js"></script>
   </head>
   <body>
     <div class="app-shell">
@@ -51,6 +58,7 @@
             <p class="history-panel__hint">
               点开其中一封，单独翻看那次来信与回信。
             </p>
+            <button id="clearHistoryBtn" class="history-clear-btn" type="button">清空信匣</button>
             <div id="historyList" class="history-list"></div>
           </div>
         </section>

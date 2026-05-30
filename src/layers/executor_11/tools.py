@@ -90,6 +90,7 @@ def shell_exec(command: str, timeout_ms: int = 30000) -> str:
             shell=True,
             capture_output=True,
             text=True,
+            errors="replace",
             timeout=timeout_s,
         )
         output_parts: list[str] = []
@@ -119,6 +120,7 @@ def git_diff() -> str:
             cwd=WORKSPACE_ROOT,
             capture_output=True,
             text=True,
+            errors="replace",
             timeout=30,
         )
         if result.stdout:
@@ -128,6 +130,7 @@ def git_diff() -> str:
             cwd=WORKSPACE_ROOT,
             capture_output=True,
             text=True,
+            errors="replace",
             timeout=30,
         )
         if staged.stdout:
