@@ -80,13 +80,18 @@
   - `docs/LAYER_STATUS.md` — webui_server 状态更新
   - `ONBOARD.md` — 版本号/测试数据同步 + 版本规则更新
   - `webui/styles.css` — 新增 max-height:720px 极紧压缩
+  - `src/shared/webui_server.py` — 增加异常处理（500 错误返回 JSON）
   - `.gitignore` — 补充 workspace/ sessions/ .pytest_cache/
 - **验证结果**:
-  - mypy src/：96 文件 0 错误 ✅
+  - mypy src/：96 文件 0 错误 ✅（含新增 traceback import）
   - pytest：73/73 通过 ✅
   - Web UI 联调：静态文件 200 ✅，`/api/chat` 中英文正常 ✅
+  - DeepSeek 真实 API 接入验证：CLI batch 模式 3 steps/7,879 tokens ✅
+  - DeepSeek + WebUI 联调：curl 中文 JSON 文件方式正常 ✅
+  - 定位 curl/bash 传中文 JSON 时 Content-Length 差异问题（前端浏览器 fetch 不受影响）
+- **提交**: `78ce5e0` + 后续修改未提交
 - **回滚判断**: 无需回滚
-- **下一步**: Web UI v1 继续 — 流式输出接入 + 移动端更多验证
+- **下一步**: Web UI v1 — 流式输出接入或 v1 收尾发布
 
 ### 2026-05-30 / v7.0 WIP — Web UI 接入暂停归档
 

@@ -21,18 +21,15 @@
 - 施工文档体系更新（CONSTRUCTION_PLAN / CODEX_MASTER / DEV_PROGRESS）
 - `mypy src` 通过（96 文件），`pytest` 通过（73/73）
 - CSS 低高度布局极紧压缩（max-height: 720px 新增 30+ 规则）
-- `/api/chat` 真实 agent 联调验证（中英文正常，heuristic provider 全链路可跑）
+- `/api/chat` 真实 agent 联调验证（heuristic + DeepSeek 双 provider 全链路可跑）
+- webui_server.py 增加异常处理（500 错误返回 JSON，而非挂起请求）
+- 定位 curl/bash 传中文 JSON 时 Content-Length 差异问题（前端浏览器 fetch 正常）
 
 ### 待完成（Web UI v1）
-- [ ] 低高度窗口布局压缩（木棉花/纸飞机稳显）
-
-### 待完成（Web UI v1）
-- [ ] 低高度窗口布局压缩（木棉花/纸飞机稳显）
-- [ ] 移动端适配验证
-- [ ] `/api/chat` 真实 agent 全链路联调
-- [ ] 流式输出接入前端
+- [ ] 低高度窗口木棉花/纸飞机浏览器目测验收
+- [ ] 移动端适配验证（手机真机或模拟器）
+- [ ] 流式输出接入前端（SSE）— 或划入 v2
 - [ ] mypy 0 错误 + pytest 全部通过
-- [ ] LOG.md + LAYER_STATUS.md 更新
 - [ ] git commit + push + tag `webui-v1`
 
 ---

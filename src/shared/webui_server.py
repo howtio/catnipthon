@@ -4,6 +4,7 @@ import json
 import os
 import re
 import threading
+import traceback
 from collections.abc import Mapping
 from dataclasses import dataclass
 from http import HTTPStatus
@@ -92,10 +93,15 @@ def _build_handler(app: App, static_dir: Path) -> type[SimpleHTTPRequestHandler]
                 self._write_json(HTTPStatus.BAD_REQUEST, {"error": "question is required"})
                 return
 
-            with task_lock:
-                result = _run_web_task(app, question, history)
-
-            self._write_json(HTTPStatus.OK, result)
+            try:
+                with task_lock:
+                    result = _run_web_task(app, question, history)
+                self._write_json(HTTPStatus.OK, result)
+            except Exception as e:
+                traceback.print_exc()
+                self._write_json(HTTPStatus.INTERNAL_SERVER_ERROR, {
+                    "error": f"{type(e).__name__}: {e}",
+                })
 
         def _handle_history_clear(self) -> None:
             with task_lock:
