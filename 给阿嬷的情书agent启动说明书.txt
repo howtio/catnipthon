@@ -1,0 +1,205 @@
+═══════════════════════════════════════════════════════
+       给阿嬷的情书 Agent — 启动说明书
+       Love Letter Agent for Grandmother
+═══════════════════════════════════════════════════════
+
+一、这是什么？
+─────────────
+
+"情书 Agent"是一个以"写给阿嬷的情书"为灵感、融合中国
+传统书信美学的 AI 助手前端界面（Web UI）。它背后运行着
+catnip-agent —— 一套 11 层架构的 Python Coding Agent
+Runtime。
+
+简单说：你打开浏览器，看到的是竖排信纸风格的聊天界面，
+像写信一样跟 AI 对话。AI 的回信也会像一封信一样叠上来。
+
+二、环境要求
+─────────────
+
+  • 操作系统：Windows 10/11（主推）、Linux、macOS
+  • Python：≥ 3.12
+  • 虚拟环境：推荐 .venv（已创建好）
+  • 网络：能访问 GitHub（拉代码）和 DeepSeek API（AI 回答）
+
+三、快速启动
+─────────────
+
+  1. 打开终端（Windows 推荐 Git Bash 或 PowerShell）
+
+  2. 进入项目目录：
+     cd C:\Users\HP\OneDrive\Desktop\agentui\catnipthon-main
+
+  3. 激活虚拟环境：
+     Git Bash:  source .venv/Scripts/activate
+     PowerShell: .venv\Scripts\Activate.ps1
+
+  4. 加载 API Key（首次需要）：
+     确保 apikey.txt 文件内容为：
+       DEEPSEEK_API_KEY=sk-你的key
+
+     Git Bash:
+       export $(grep DEEPSEEK_API_KEY apikey.txt | xargs)
+
+     PowerShell:
+       Get-Content apikey.txt | ForEach-Object {
+         $k,$v = $_ -split '='
+         if ($k -eq 'DEEPSEEK_API_KEY') {
+           Set-Item -Path "env:$k" -Value $v
+         }
+       }
+
+  5. 启动 Web UI：
+     python -m src.main --webui
+
+  6. 打开浏览器，访问：
+     http://127.0.0.1:8765
+
+  就这么简单。你会看到"情书 Agent"的界面——木棉花、
+  旧信匣、信纸叠层，一个漂亮的中文书信风格 AI 界面。
+
+四、界面功能
+─────────────
+
+  ┌─────────────────────────────────────────────────────┐
+  │  旧信匣（左侧）             情书 Agent              │
+  │  ┌─────────────────┐  ┌──────────────────────────┐ │
+  │  │ 往来书简         │  │  木槿添纸，纸飞机寄信    │ │
+  │  │ 旧信匣           │  │                          │ │
+  │  │ [点一下摊开]     │  │  ┌────────────────────┐ │ │
+  │  │ [img]            │  │  │                    │ │ │
+  │  │                  │  │  │  信纸在这里叠上来  │ │ │
+  │  │                  │  │  │                    │ │ │
+  │  │                  │  │  └────────────────────┘ │ │
+  │  │                  │  │                          │ │
+  │  │                  │  │  [添一纸]  [✉情书agent] [寄出去] │
+  │  └─────────────────┘  └──────────────────────────┘ │
+  └─────────────────────────────────────────────────────┘
+
+  • 添一纸（木棉花按钮）：添加一封新的信纸（开始新对话）
+  • 寄出去（纸飞机按钮）：发送当前信纸上的内容给 AI
+  • 旧信匣（左侧）：点开查看历史对话记录
+    - 点其中一封可单独翻看
+    - 每封信都支持导出 PDF
+    - "清空信匣"清空所有历史
+  • 每封信纸右下角有 PDF 导出按钮（↓），点击自动下载
+
+五、PDF 导出
+─────────────
+
+  每封信（无论是当前对话还是旧信匣里）都可以导出为 PDF。
+
+  • 文件名自动按时间命名：情书-20260530-143022.pdf
+  • PDF 样式与 Web UI 内的信纸完全一致
+  • 竖排从右到左（vertical-rl）书法排版
+  • 自动保存到浏览器默认下载目录，不需要打印弹窗
+
+  导出入口：
+  - 信纸右下角的 ↓ 按钮
+  - 旧信匣弹窗中每封信的 ↓ 按钮
+
+六、AI 思考过程实时可见
+─────────────────────
+
+  当你寄出一封信后，AI 回信在"路上"时，信纸上会实时显示
+  AI 的思考过程（推理文字 + 工具调用），而不是傻等。
+
+  如果一切正常，你会看到：
+    —— 思考中——
+    —— read_file "xxx"
+    —— web_search "xxx"
+
+  这说明 AI 正在工作，不是卡死了。
+
+  如果长时间没反应（超过 60 秒），可能是 DeepSeek API
+  超时，可以新添一纸重试。
+
+七、数据持久化
+─────────────
+
+  所有对话历史自动保存在浏览器的 localStorage 里。
+  刷新页面、关闭重开，历史都在。
+
+  "清空信匣"按钮会同时清除：
+  1. 浏览器 localStorage
+  2. 服务端会话记忆（session memory）
+
+八、常见问题
+─────────────
+
+  Q：页面打开是白屏 / 字体显示异常？
+  A：本界面使用了 Google Fonts，在中国大陆可能需要科学
+     上网。如果字体加载被墙，页面改用系统备选字体，功能
+     不受影响。首次加载后字体会被缓存。
+
+  Q：发送后信纸一直显示"正在路上"没反应？
+  A：可能是 API Key 没有设置，或 DeepSeek API 超时。
+     检查终端输出是否有错误信息。
+     用 python -m src.main "你好" 测试 CLI 模式是否正常。
+
+  Q：可以两个浏览器窗口同时用吗？
+  A：服务端同一时间只处理一个任务（单任务限流）。第二个
+     请求会收到"任务已在运行"提示。但多个窗口可以各自
+     查看历史。
+
+  Q：如何关闭服务端？
+  A：在终端按 Ctrl+C 即可停止 HTTP 服务。
+
+  Q：数据存在哪里？安全吗？
+  A：对话历史存在你浏览器的 localStorage（本地存储），
+     服务端 session memory 存在进程内存中。停止服务端后
+     session memory 消失，但 localStorage 还在浏览器里。
+     所有 AI 请求通过 DeepSeek API，数据会发送到 DeepSeek
+     服务器处理。
+
+九、命令行操作（进阶）
+─────────────────
+
+  除了 Web UI，本项目也支持纯命令行模式：
+
+    # 单次对话
+    python -m src.main "你好，请介绍一下这个项目"
+
+    # 交互式 REPL 模式
+    python -m src.main
+
+    # 指定 provider
+    CATNIP_RUNNER_PROVIDER=heuristic python -m src.main "..."
+
+  内部命令（REPL 模式）：
+    /help     — 帮助
+    /exit     — 退出
+    /clear    — 清屏
+    /history  — 显示历史
+    /provider — 切换 provider
+
+十、系统架构（给开发者）
+────────────────────
+
+  情书 Agent 底层是 catnip-agent 的 11 层架构：
+
+  gateway_01 → queue_02 → worker_03 → harness_04 →
+  context_05 → skills_06 → memory_07 → runner_08 →
+  eventbus_09 → tool_registry_10 → executor_11
+
+  Web UI 通过 src/shared/webui_server.py 桥接：
+  - 后台线程运行 agent
+  - EventBus 订阅实时事件（推理、工具调用）
+  - 前端轮询 /api/chat/think/{run_id} 获取进度
+  - 静态文件由 Python http.server 托管
+
+  AI 提供商：DeepSeek（deepseek-chat 模型）
+  前端技术：原生 HTML/CSS/JS + html2pdf.js
+
+十一、版本与分支
+──────────────
+
+  • 当前版本：7.0
+  • 当前分支：给阿嬷的agent
+  • 里程碑：webui-v1
+  • 备份分支：backup/20260530-webui-v1-final
+
+──────────────────────────────────────────────────────
+  给阿嬷 —— 木槿添纸，纸飞机寄信。
+  回答会像回信一样，轻轻叠上来。
+──────────────────────────────────────────────────────
