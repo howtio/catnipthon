@@ -17,8 +17,8 @@
 - 实时进度跟踪（ProgressTracker 通过 EventBus 订阅显示 tool 调用/步骤完成）
 - 提供商运行时切换（/provider heuristic|deepseek）
 - 内部命令（/help /exit /clear /history）
-- `src/main.py --webui` Web UI 启动入口（进行中）
-- Web UI 当前已具备暂停前可交接入口，后续重点是低高度布局与使用流畅度收口
+- `src/main.py --webui` Web UI 启动入口（已验证）
+- Web UI 小窗布局已收口，`827 × 698` 下底部按钮完整可见
 
 ## 02 Queue
 
@@ -46,6 +46,7 @@
 - create_run: UUID + RunInfo 创建
 - run_lifecycle: 顺序调用 Context→Skills→Memory→Runner（含真实 agent loop）
 - run_lifecycle: 自动收集 tool_summary、step count、modified_files
+- run_lifecycle: 按单次 run 切片统计指标，避免多轮累计污染 Web UI / CLI 指标
 - build_final_report: FinalReport 构建 + 格式化（含工具计数、修改文件列表）
 - wrapper: HarnessLayerApi 公开接口（注入所有依赖）
 
@@ -53,7 +54,6 @@
 - max_step_policy
 - acceptance_check
 - safe_git_diff
-- Web UI 真实联调验证（进行中）
 
 ## 05 Context
 
@@ -137,6 +137,7 @@
 
 **已实现:**
 - tools.py: 10 个真实工具（list_files / read_file / write_file / patch_file / shell_exec / git_diff / web_fetch / web_search / open_browser / file_search）
+- tools.py: subprocess 文本输出在 Windows 下使用 `errors="replace"`，避免测试期解码 warning
 - web_search: ddgs 库为主 + HTTP 直搜后备（v7.0）
 - guard.py: Guard 统一入口（自动识别工具类别运行对应 guard，含 _check_url SSRF 防护）
 - policy/url_guard: SSRF 防护（拦截 localhost/127.0.0.1/私有 IP）
@@ -159,4 +160,4 @@
 - cli: Claude Code 风格 CLI（print_step_claude / print_result_claude / print_summary_claude / print_thinking / print_streaming_answer）+ 粉红开机动画（_pink）
 - interactive: ThreadPoolExecutor 后台 agent + 实时注入 + 线程安全 EventBus
 - jsonl_logger: EventBus 全事件旁路写入 logs/catnip.jsonl
-- webui_server: 静态页面托管 + `/api/chat` 桥接 + 后台线程 agent 执行 + 实时思考轮询 + 会话清空（Web UI v1 已完成 ✅）
+- webui_server: 静态页面托管 + `/api/chat` / `/api/chat/think/:run_id` 异步桥接 + trailing current-question 去重（Web UI v1 已完成 ✅）

@@ -60,38 +60,35 @@
 
 ## 最近记录
 
-### 2026-05-30 / Web UI v1 完整发布 — 实时思考 + PDF 自动导出 + 清空信匣
+### 2026-05-30 / Web UI v1 收口 — 异步桥接 + 低高度布局 + 回归修复
 
-- **版本**: `7.0`（里程碑: `webui-v1`）
+- **版本**: `7.0`
 - **分支**: `给阿嬷的agent`
 - **目标**:
-  - 实时 agent 思考显示（回信未封缄时看到推理过程）
-  - PDF 自动导出（html2pdf.js，无打印弹窗）
-  - 清空信匣功能
-  - Google Fonts 非阻塞加载（解决国内卡死问题）
-  - 整理代码 + git push + 撰写 startup guide
+  - 把情书式前端真正接入 catnip-agent
+  - 修复窄窗下木槿花/纸飞机被挤出视口
+  - 修复多轮 history 重复与 run 指标累计问题
+  - 验证 `/api/chat` + `/api/chat/think/:run_id` 异步问答链路
 - **开工检查**:
   - 当前分支: `给阿嬷的agent`
-  - 备份分支: `backup/20260530-webui-v1-final`
+  - 备份分支: `backup/20260530-webui-v1-continue`
   - mypy: 96 文件 0 错误
   - pytest: 75/75 通过
 - **修改文件**:
-  - `webui/app.js` — 新增 requestHttpAgentReply 异步轮询、onThinking 实时渲染、exportConversation html2pdf 自动下载、clearHistoryBtn 点击处理、getVisiblePapers 使用 thinking 字段
-  - `webui/index.html` — Google Fonts 改为非阻塞加载（media="print" + onload）、引入 html2pdf.bundle.min.js、清空信匣按钮
-  - `webui/styles.css` — 删除 @media print / @page / .sheet__thinking，保留导出按钮样式、新增 .history-clear-btn
-  - `webui/assets/html2pdf.bundle.min.js` — 新增加载（jsdelivr CDN）
-  - `src/shared/webui_server.py` — 新增 _run_buffers/_active_run_id 状态管理、do_GET 轮询端点、_start_web_task_background 后台线程 + EventBus 订阅、_on_reasoning_chunk/_on_answer_chunk/_on_tool_call 缓冲写入
-  - `src/layers/harness_04/run_lifecycle.py` — 新增 import Callable（补充之前缺失）
-  - `src/layers/executor_11/tools.py` — 新增 import Callable（补充之前缺失）
-  - `tests/test_harness.py` — 新增 import Callable
-  - `tests/test_webui_server.py` — 新增 2 个测试（历史清空、双重请求拒绝）
-  - `docs/DEV_PROGRESS.md` — 更新已完成条目
+  - `webui/styles.css` — 调整 `980px / 760px` 响应式断点，保证小窗下底部按钮完整可见
+  - `webui/app.js` — 发送时只携带既有历史，适配异步轮询返回，并把 pending 中的过程文案压成短句
+  - `src/shared/webui_server.py` — 增加 trailing current-question 去重，维持异步桥接协议
+  - `src/layers/harness_04/run_lifecycle.py` — 改为按本次 run 切片统计 steps / tool_summary / token_usage
+  - `src/layers/executor_11/tools.py` — subprocess 输出增加 `errors="replace"`，消除 Windows 解码 warning
+  - `tests/test_harness.py` — 新增 run 指标不累计回归测试
+  - `tests/test_webui_server.py` — 新增 optimistic history 去重测试
 - **验证**:
   - mypy: 96 文件 0 错误 ✅
   - pytest: 75/75 通过 ✅
-  - 静态文件 200 ✅，html2pdf.js 可加载 ✅，清空信匣按钮交互正常 ✅
+  - 浏览器小窗验证：`827 × 698` 下木槿花与纸飞机完整可见 ✅
+  - 协议级冒烟：`POST /api/chat` 返回 `run_id`，随后轮询 `/api/chat/think/:run_id` 直至 `completed` ✅
 - **提交**: （待补充）
-- **下一步**: 等待用户反馈，规划 Web UI v2 或下一阶段
+- **下一步**: 如需继续，进入 Web UI v2（真流式输出 / 移动端 / 过程文案优化）
 
 ### 2026-05-30 / Web UI v1 追加 — localStorage 持久化 + PDF 导出
 
