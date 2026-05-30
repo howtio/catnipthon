@@ -11,14 +11,24 @@
 
 ## 当前施工中
 
-- Web UI 接入进行中，当前已暂停
-- 已新增 `webui/` 前端目录与素材
-- 已新增 `src/shared/webui_server.py` 与 `python -m src.main --webui` 启动入口
-- 已接通前端到 `/api/chat` 的基础桥接
-- 当前暂停点：
-  - 低高度窗口布局仍需继续压缩，确保木棉花与纸飞机稳定完整显示
-  - 仍需继续做真实联调与“流畅度”验证
-  - 当前目录缺少 `.git/` 与 `.venv/`，未满足施工文档要求的完整开工/收尾条件
+**支线：** `给阿嬷的agent`
+**当前阶段：** Web UI v1 — 布局收口 + 真实联调
+
+### 本阶段已完成
+- `.venv/` 虚拟环境创建 + 依赖安装
+- git 仓库初始化 + 首次提交 `af0b20c` + GitHub 推送
+- 备份分支：`backup/20260530-initial`
+- 施工文档体系更新（CONSTRUCTION_PLAN / CODEX_MASTER / DEV_PROGRESS）
+- `mypy src` 通过（96 文件），`pytest` 通过（73/73）
+
+### 待完成（Web UI v1）
+- [ ] 低高度窗口布局压缩（木棉花/纸飞机稳显）
+- [ ] 移动端适配验证
+- [ ] `/api/chat` 真实 agent 全链路联调
+- [ ] 流式输出接入前端
+- [ ] mypy 0 错误 + pytest 全部通过
+- [ ] LOG.md + LAYER_STATUS.md 更新
+- [ ] git commit + push + tag `webui-v1`
 
 ---
 
@@ -50,8 +60,11 @@
 | v7.0 搜索增强（ddgs 迁移 + HTTP 后备） | **已实现** ✅ |
 | v7.0 CLI 交互大修（思考过滤 + 流式答案 + 警告抑制） | **已实现** ✅ |
 | v7.0 System Prompt 优化（shell_exec 约束） | **已实现** ✅ |
-| typecheck | 通过（95 文件，0 错误） |
-| 测试 | 70 个，全部通过 |
+| Web UI v1（布局收口 + 真实联调） | 🔜 进行中 |
+| Web UI v2（流式输出 + 历史持久化） | 📋 待开始 |
+| Web UI v3（完整能力替代 CLI REPL） | 📋 待开始 |
+| typecheck | 通过（96 文件，0 错误） |
+| 测试 | 73 个，全部通过 |
 
 ---
 
@@ -112,4 +125,5 @@
   - `src/main.py` 新增 `--webui` 启动入口
   - `webui/app.js` 现在优先走 HTTP API，`file://` 场景保留 mock
   - 新增 `tests/test_webui_server.py` 覆盖结果提取与历史格式转换
-  - 当前仍需继续做布局收口、联调，以及按施工文档补齐 git/venv 环境
+  - 已完成暂停前校验：`mypy src` 通过（96 文件），`pytest` 通过（73/73）
+  - 当前仍需继续做布局收口、联调，以及按施工文档推进 GitHub 分支 `给阿嬷的agent`

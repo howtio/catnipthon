@@ -18,6 +18,7 @@
 - 提供商运行时切换（/provider heuristic|deepseek）
 - 内部命令（/help /exit /clear /history）
 - `src/main.py --webui` Web UI 启动入口（进行中）
+- Web UI 当前已具备暂停前可交接入口，后续重点是低高度布局与使用流畅度收口
 
 ## 02 Queue
 
@@ -158,4 +159,4 @@
 - cli: Claude Code 风格 CLI（print_step_claude / print_result_claude / print_summary_claude / print_thinking / print_streaming_answer）+ 粉红开机动画（_pink）
 - interactive: ThreadPoolExecutor 后台 agent + 实时注入 + 线程安全 EventBus
 - jsonl_logger: EventBus 全事件旁路写入 logs/catnip.jsonl
-- webui_server: 静态页面托管 + `/api/chat` 桥接（进行中）
+- webui_server: 静态页面托管 + `/api/chat` 桥接（Web UI v1 进行中）
